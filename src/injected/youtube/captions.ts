@@ -1,6 +1,6 @@
 import convert from "convert";
 
-export type UnitType = "Kilometer" | "Mile";
+export type UnitType = "Kilometer" | "Mile" | "Fahrenheit" | "Celsius";
 
 export interface UnitMatch {
   unitType: UnitType;
@@ -14,6 +14,8 @@ export const unitMapping: Record<string, UnitType> = {
   kilometers: "Kilometer",
   mile: "Mile",
   miles: "Mile",
+  fahrenheit: "Fahrenheit",
+  celsius: "Celsius",
 };
 
 export interface Convertable {
@@ -26,9 +28,10 @@ export interface CaptionSegment {
   duration: number;
   text: string;
   unitMatch: UnitMatch;
-  captionedUnit: UnitType;
+  convertable: Convertable;
+  // captionedUnit: UnitType;
 }
-
+// export type Transformer = ()
 export interface Captions {
   captions: CaptionSegment[];
 }

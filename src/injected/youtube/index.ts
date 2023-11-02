@@ -21,7 +21,7 @@ import {
   createSimpleRequest,
 } from "../../messaging/request_systems/simple_request";
 import { transcribe } from "./transcriber";
-import { createOverlay } from "./overlay";
+import { captionsSetup, createOverlay } from "./overlay";
 
 /**
  * handle requests sent via the message system
@@ -34,6 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       transcribe(videoId).then((captions) => {
         console.log(captions);
         createOverlay();
+        captionsSetup(captions);
       });
     } else {
       console.error("couldnt get video id");
