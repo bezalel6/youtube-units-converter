@@ -26,14 +26,15 @@
   "commands": {},
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": ["injected/all_pages.js"]
-    },
-    {
-      "matches": ["https://*/home/*", "http://*/home/*"],
-      "js": ["injected/home_page.js"]
+      "matches": [
+        "https://*/youtube/*",
+        "http://*/youtube/*",
+        "https://www.youtube.com/*"
+      ],
+      "js": ["injected/youtube.js"]
     }
   ],
+  "host_permissions": ["*://*/"],
   "homepage_url": "https://github.com/albertpatterson/chrome-extension-starter",
-  "permissions": []
+  "permissions": ["webNavigation", "scripting", "tabs", "activeTab"]
 }
