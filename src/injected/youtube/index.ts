@@ -21,6 +21,7 @@ import {
   createSimpleRequest,
 } from "../../messaging/request_systems/simple_request";
 import { transcribe } from "./transcriber";
+import { createOverlay } from "./overlay";
 
 /**
  * handle requests sent via the message system
@@ -30,7 +31,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.data.message == "popup-popped") {
     const videoId = getVideoId();
     if (videoId) {
-      transcribe(videoId).then(console.log);
+      transcribe(videoId).then((captions) => {
+        console.log(captions);
+        createOverlay();
+      });
     } else {
       console.error("couldnt get video id");
     }
@@ -41,7 +45,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 /**
  * Top level extension logic
  */
-
 function getVideoId(): string | null {
   const url = window.location.href;
   const urlObj = new URL(url);
@@ -59,3 +62,5 @@ function getVideoId(): string | null {
   // console.log("received response (from service worker):");
   // logResponse(result);
 })();
+
+//todo overlay the converted text over the video
