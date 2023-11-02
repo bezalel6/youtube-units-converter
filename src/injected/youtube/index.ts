@@ -20,13 +20,21 @@ import {
   simpleRequestSystem,
   createSimpleRequest,
 } from "../../messaging/request_systems/simple_request";
+import { transcribe } from "./transcriber";
 
 /**
  * handle requests sent via the message system
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log("received request in tab", request);
-
+  if (request.data.message == "popup-popped") {
+    const videoId = getVideoId();
+    if (videoId) {
+      transcribe(videoId).then(console.log);
+    } else {
+      console.error("couldnt get video id");
+    }
+  }
   return handleRequestInTab(request, sender, sendResponse);
 });
 
@@ -34,14 +42,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
  * Top level extension logic
  */
 
+function getVideoId(): string | null {
+  const url = window.location.href;
+  const urlObj = new URL(url);
+  const params = new URLSearchParams(urlObj.search);
+  if (!params.has("v")) return null;
+  return params.get("v");
+}
+
 (async () => {
-  const msg = `page with title "${document.title}" loaded!`;
-  console.log(
-    `sending simple request in tab (to service worker) with message "${msg}"`
-  );
-  const result = await simpleRequestSystem.sendRequestToServiceWorker(
-    createSimpleRequest({ message: msg })
-  );
-  console.log("received response (from service worker):");
-  logResponse(result);
+  console.log(`loaded in ${document.title}`);
+
+  // const result = await simpleRequestSystem.sendRequestToServiceWorker(
+  //   createSimpleRequest({ message: msg })
+  // );
+  // console.log("received response (from service worker):");
+  // logResponse(result);
 })();

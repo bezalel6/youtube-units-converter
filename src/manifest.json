@@ -36,5 +36,5 @@
   ],
   "host_permissions": ["*://*/"],
   "homepage_url": "https://github.com/albertpatterson/chrome-extension-starter",
-  "permissions": ["webNavigation", "scripting", "tabs", "activeTab"]
+  "permissions": ["webNavigation", "scripting", "tabs", "activeTab", "storage"]
 }

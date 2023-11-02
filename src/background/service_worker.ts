@@ -24,20 +24,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   return handleRequestInServiceWorker(request, sender, sendResponse);
 });
-chrome.webNavigation.onHistoryStateUpdated.addListener(
-  (details) => {
-    chrome.scripting
-      .executeScript({
-        target: { tabId: details.tabId },
-        files: ["injected/youtube.js"],
-      })
-      .then(() => console.log("script injected"));
-    // chrome.tabs.executeScript(details.tabId, {
-    //   file: "youtube.js",
-    // });
-  },
-  { url: [{ hostSuffix: "youtube.com" }] }
-);
+// chrome.webNavigation.onHistoryStateUpdated.addListener(
+//   (details) => {
+//     chrome.scripting
+//       .executeScript({
+//         target: { tabId: details.tabId },
+//         files: ["injected/youtube.js"],
+//       })
+//       .then(() => console.log("script injected"));
+//     // chrome.tabs.executeScript(details.tabId, {
+//     //   file: "youtube.js",
+//     // });
+//   },
+//   { url: [{ hostSuffix: "youtube.com" }] }
+// );
 
 /**
  * Top level extension logic

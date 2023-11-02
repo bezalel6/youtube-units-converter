@@ -14,8 +14,12 @@
  * be preserved. Contributors provide an express grant of patent rights.
  */
 
-import '../scss/styles.scss';
+import {
+  simpleRequestSystem,
+  createSimpleRequest,
+} from "../../messaging/request_systems/simple_request";
+import "../scss/styles.scss";
 
 function handleShowGreetingsToggled(checkbox: HTMLInputElement) {
-  console.log('handleShowGreetingsToggled', checkbox.checked);
+  console.log("handleShowGreetingsToggled", checkbox.checked);
 }
