@@ -21,7 +21,12 @@ import {
   createSimpleRequest,
 } from "../../messaging/request_systems/simple_request";
 import { transcribe } from "./transcriber";
-import { captionsSetup, createOverlay } from "./overlay";
+import {
+  captionsSetup,
+  createOverlay,
+  isOverlayAdded,
+  setText,
+} from "./overlay";
 
 /**
  * handle requests sent via the message system
@@ -29,19 +34,65 @@ import { captionsSetup, createOverlay } from "./overlay";
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log("received request in tab", request);
   if (request.data.message == "popup-popped") {
-    const videoId = getVideoId();
-    if (videoId) {
+    // run();
+    setText("YES I AM HERE");
+  }
+  return handleRequestInTab(request, sender, sendResponse);
+});
+
+function run() {
+  console.log("running...");
+  const videoId = getVideoId();
+  if (videoId) {
+    if (isOverlayAdded()) {
+      console.log("overlay exists. not recreating");
+    } else {
       transcribe(videoId).then((captions) => {
         console.log(captions);
         createOverlay();
         captionsSetup(captions);
       });
-    } else {
-      console.error("couldnt get video id");
     }
+  } else {
+    console.error("couldnt get video id");
   }
-  return handleRequestInTab(request, sender, sendResponse);
+}
+// Function to call when URL changes
+// function onUrlChange(url) {
+//   console.log("The URL has changed to: " + url);
+// }
+
+// Listen for popstate event
+window.addEventListener("popstate", function (event) {
+  // onUrlChange(document.location.href);
+  console.log("popstate event");
+  run();
 });
+window.addEventListener("DOMContentLoaded", function (event) {
+  // onUrlChange(document.location.href);
+  console.log("doc content loaded");
+  run();
+});
+
+// Observe the body or a specific element that changes when navigating to a new video
+const config = { childList: true, subtree: true };
+
+// Store the current URL for comparison
+let currentUrl = document.location.href;
+
+// Create a mutation observer to listen for changes in the DOM
+// It could indicate a change in content without a popstate event
+var observer = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    // Check if the URL has changed
+    if (document.location.href !== currentUrl) {
+      // onUrlChange(document.location.href);
+      currentUrl = document.location.href; // Update the current URL
+      run();
+    }
+  });
+});
+observer.observe(document.body, config);
 
 /**
  * Top level extension logic
@@ -56,7 +107,7 @@ function getVideoId(): string | null {
 
 (async () => {
   console.log(`loaded in ${document.title}`);
-
+  run();
   // const result = await simpleRequestSystem.sendRequestToServiceWorker(
   //   createSimpleRequest({ message: msg })
   // );

@@ -1,12 +1,19 @@
 import convert from "convert";
 
-export type UnitType = "Kilometer" | "Mile" | "Fahrenheit" | "Celsius";
+export type UnitType = "Kilometer" | "Mile" | "Feet" | "Fahrenheit" | "Celsius";
 
 export interface UnitMatch {
   unitType: UnitType;
   unit: string;
   position: number;
 }
+
+export const unitAllowedDividersMapping: Map<UnitType, string[]> = new Map([
+  ["Kilometer", []],
+  ["Mile", []],
+  ["Fahrenheit", ["degrees", "degree"]],
+  ["Celsius", ["degrees", "degree"]],
+]);
 
 export const unitMapping: Record<string, UnitType> = {
   km: "Kilometer",
@@ -16,6 +23,9 @@ export const unitMapping: Record<string, UnitType> = {
   miles: "Mile",
   fahrenheit: "Fahrenheit",
   celsius: "Celsius",
+  feet: "Feet",
+  foot: "Feet",
+  ft: "Feet",
 };
 
 export interface Convertable {

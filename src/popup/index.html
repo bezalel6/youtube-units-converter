@@ -1,13 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
+<html>
 
-<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title></title>
-  <meta name="description" content="">
-  <meta name="author" content="Albert Patterson">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
+
 <body>
+  <div class="container">
+    <h1>Extension Options</h1>
+    <form id="options-form">
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input option-input" id="feature1">
+        <label class="custom-control-label" for="feature1">Enable Feature 1</label>
+      </div>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input option-input" id="feature2">
+        <label class="custom-control-label" for="feature2">Enable Feature 2</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </div>
 </body>
-  <h1>Hello World</h1>
+
 </html>

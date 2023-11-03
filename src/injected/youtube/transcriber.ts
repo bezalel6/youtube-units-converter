@@ -5,6 +5,7 @@ import {
   RawCaption,
   RawCaptions,
   UnitMatch,
+  unitAllowedDividersMapping,
   unitMapping,
 } from "./captions";
 import { numberifyText } from "numberify-text";
@@ -27,6 +28,7 @@ export function filter(rawCaptions: RawCaptions) {
     caption.text = numberifyText(caption.text, "en");
     for (const match of findUnits(caption.text)) {
       console.log(match);
+      const divider = unitAllowedDividersMapping.get(match.unitType);
       /** covering edge case of:
        *
        *  kjkjkjk 50->kilometers
@@ -35,12 +37,12 @@ export function filter(rawCaptions: RawCaptions) {
       if (
         match.position === 0 &&
         lastLine &&
-        endsWithNum(lastLine.text) !== null
+        endsWithNum(lastLine.text, divider) !== null
       ) {
         captions.captions.push({
           convertable: {
             unit: match.unitType,
-            amount: endsWithNum(lastLine.text)!,
+            amount: endsWithNum(lastLine.text, divider)!,
           },
           start: lastLine.start,
           duration: lastLine.duration + caption.duration,
@@ -49,8 +51,10 @@ export function filter(rawCaptions: RawCaptions) {
         });
         continue;
       }
+      //   console.log("slicing", caption);
       const sliceBeforeUnit = caption.text.slice(0, match.position);
-      const num = endsWithNum(sliceBeforeUnit);
+      //   console.log("sliced:", sliceBeforeUnit);
+      const num = endsWithNum(sliceBeforeUnit, divider);
       if (num !== null) {
         captions.captions.push({
           convertable: { unit: match.unitType, amount: num },
@@ -74,6 +78,10 @@ function transform(captions: Captions): Captions {
         .toString(0);
     } else if (caption.convertable.unit === "Fahrenheit") {
       caption.text = convert(caption.convertable.amount, "fahrenheit")
+        .to("best", "metric")
+        .toString(0);
+    } else if (caption.convertable.unit === "Feet") {
+      caption.text = convert(caption.convertable.amount, "feet")
         .to("best", "metric")
         .toString(0);
     }
