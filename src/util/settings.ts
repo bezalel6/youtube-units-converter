@@ -27,7 +27,13 @@ export const SettingsManager = {
     type: "checkbox" as const,
     value: true,
     id: "dark-mode",
-    name: "Enabled",
+    name: "Dark mode",
+  },
+  textSize: {
+    type: "dropdown" as const,
+    value: { choices: ["meow", "joe biden 👌"], selected: 0 },
+    id: "textSize",
+    name: "Text Size",
   },
 };
 

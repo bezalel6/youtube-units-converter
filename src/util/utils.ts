@@ -36,3 +36,19 @@ export const endsWithNum = (
   }
   return null;
 };
+export function shallowEqual(obj1: any, obj2: any): boolean {
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  // Create sets of keys for each object
+  const setKeys1 = new Set(keys1);
+  const setKeys2 = new Set(keys2);
+
+  // Check if both objects have the same set of keys
+  if (setKeys1.size !== setKeys2.size) {
+    return false;
+  }
+
+  // Check if all keys in obj1 have the same value in obj2
+  return keys1.every((key) => obj2.hasOwnProperty(key));
+}
