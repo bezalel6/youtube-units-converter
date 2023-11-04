@@ -24,7 +24,7 @@ export function setCSS({ settings }: cssProps): CSS {
     .s("top", "0")
     .s("left", "0")
     .s("webkitTextStroke", "3px black")
-    .s("display", "flex")
+    .s("display", settings.enabled.value ? "flex" : "none")
     .s("alignItems", "center")
     .s(
       "color",
