@@ -1,7 +1,10 @@
-import convert from "convert";
+import convert, { Area, Length, Temperature } from "convert";
 
-export type UnitType = "Kilometer" | "Mile" | "Feet" | "Fahrenheit" | "Celsius";
+// export type UnitType = "Kilometer" | "Mile" | "Feet" | "Fahrenheit" | "Celsius";
+export type UnitType = Area | Length | Temperature;
 
+// export type ConvertTypes =
+// type t = Unit;
 export interface UnitMatch {
   unitType: UnitType;
   unit: string;
@@ -9,23 +12,55 @@ export interface UnitMatch {
 }
 
 export const unitAllowedDividersMapping: Map<UnitType, string[]> = new Map([
-  ["Kilometer", []],
-  ["Mile", []],
-  ["Fahrenheit", ["degrees", "degree"]],
-  ["Celsius", ["degrees", "degree"]],
+  // ["Kilometer", []],
+  // ["Mile", []],
+  // ["Fahrenheit", ["degrees", "degree"]],
+  // ["Celsius", ["degrees", "degree"]],
 ]);
-
 export const unitMapping: Record<string, UnitType> = {
-  km: "Kilometer",
-  kilometer: "Kilometer",
-  kilometers: "Kilometer",
-  mile: "Mile",
-  miles: "Mile",
-  fahrenheit: "Fahrenheit",
-  celsius: "Celsius",
-  feet: "Feet",
-  foot: "Feet",
-  ft: "Feet",
+  // Length units
+  km: "kilometer",
+  kilometer: "kilometer",
+  kilometers: "kilometer",
+  m: "meter",
+  meter: "meter",
+  meters: "meter",
+  cm: "centimeter",
+  centimeter: "centimeter",
+  centimeters: "centimeter",
+  mm: "millimeter",
+  millimeter: "millimeter",
+  millimeters: "millimeter",
+  mile: "mile",
+  miles: "mile",
+  yd: "yard",
+  yard: "yard",
+  yards: "yard",
+  ft: "foot",
+  feet: "foot",
+  foot: "foot",
+  in: "inch",
+  inch: "inch",
+  inches: "inch",
+
+  // Area units
+  sqkm: "square kilometer",
+  sqm: "square meter",
+  sqft: "square foot",
+  sqyd: "square yard",
+  sqin: "square inch",
+  acre: "acre",
+  hectares: "hectare",
+
+  // Temperature units
+  c: "celsius",
+  celsius: "celsius",
+  f: "fahrenheit",
+  fahrenheit: "fahrenheit",
+  k: "kelvin",
+  kelvin: "kelvin",
+
+  // Add more units as needed
 };
 
 export interface Convertable {

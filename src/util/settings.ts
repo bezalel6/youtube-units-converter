@@ -34,6 +34,15 @@ export let SettingsManager = {
     id: "textSize",
     name: "Text Size",
   },
+  unitSelection: {
+    type: "dropdown" as const,
+    value: {
+      choices: ["metric", "imperial"],
+      selected: 0,
+    },
+    id: "unitSelection",
+    name: "Unit",
+  },
   textColor: {
     type: "dropdown" as const,
     value: {

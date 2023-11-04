@@ -1,4 +1,4 @@
-import convert from "convert";
+import convert, { Length } from "convert";
 import { endsWithNum } from "../../util/utils";
 import {
   Captions,
@@ -74,19 +74,25 @@ export function filter(rawCaptions: RawCaptions) {
 }
 function transform(captions: Captions): Captions {
   for (const caption of captions.captions) {
-    if (caption.convertable.unit === "Mile") {
-      caption.text = convert(caption.convertable.amount, "miles")
-        .to("best", "metric")
-        .toString(0);
-    } else if (caption.convertable.unit === "Fahrenheit") {
-      caption.text = convert(caption.convertable.amount, "fahrenheit")
-        .to("best", "metric")
-        .toString(0);
-    } else if (caption.convertable.unit === "Feet") {
-      caption.text = convert(caption.convertable.amount, "feet")
-        .to("best", "metric")
-        .toString(0);
-    }
+    caption.text = convert(
+      caption.convertable.amount,
+      caption.convertable.unit as any
+    )
+      .to("best", "metric")
+      .toString(0);
+    // if (caption.convertable.unit === "miles") {
+    //   caption.text = convert(caption.convertable.amount, "miles")
+    //     .to("best", "metric")
+    //     .toString(0);
+    // } else if (caption.convertable.unit === "Fahrenheit") {
+    //   caption.text = convert(caption.convertable.amount, "fahrenheit")
+    //     .to("best", "metric")
+    //     .toString(0);
+    // } else if (caption.convertable.unit === "Feet") {
+    //   caption.text = convert(caption.convertable.amount, "feet")
+    //     .to("best", "metric")
+    //     .toString(0);
+    // }
   }
 
   return captions;

@@ -78,7 +78,7 @@ function onTimeUpdate() {
     if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
       console.log("running ", scheduled.text);
 
-      if (str.length) str += "  ";
+      if (str.length) str += "\n";
       str += scheduled.text;
     }
     // else {
