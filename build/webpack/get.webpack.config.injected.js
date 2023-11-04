@@ -14,24 +14,25 @@
  * be preserved. Contributors provide an express grant of patent rights.
  */
 
-import path from 'path';
-import { getConfig as getScriptConfig } from './get.webpack.config.srcipt.js';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { getDirs, getFileWithName } from 'simple_build_tools';
+import path from "path";
+import { getConfig as getScriptConfig } from "./get.webpack.config.srcipt.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { getDirs, getFileWithName } from "simple_build_tools";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const TOP_DIR = path.resolve(__dirname, '..', '..');
-const SRC_DIR = path.resolve(TOP_DIR, 'src');
+const TOP_DIR = path.resolve(__dirname, "..", "..");
+const SRC_DIR = path.resolve(TOP_DIR, "src");
 const MESSAGE_SYSTEMS_DIR = path.resolve(
   SRC_DIR,
-  'messaging',
-  'message_systems'
+  "messaging",
+  "message_systems"
 );
 
 function getContext() {
-  return path.resolve(SRC_DIR, 'injected');
+  return path.resolve(SRC_DIR, "injected");
 }
 
 async function getEntry() {
@@ -42,7 +43,7 @@ async function getEntry() {
   const entry = {};
   for (const name of names) {
     const dir = path.resolve(context, name);
-    const indexName = await getFileWithName(dir, 'index', ['js', 'ts']);
+    const indexName = await getFileWithName(dir, "index", ["js", "ts"]);
     entry[name] = path.resolve(context, name, indexName);
   }
 
@@ -52,8 +53,8 @@ async function getEntry() {
 export async function getConfig(isProd) {
   const entry = await getEntry();
   const output = {
-    filename: '[name].js',
-    path: path.resolve(TOP_DIR, 'dist', 'unpacked', 'injected'),
+    filename: "[name].js",
+    path: path.resolve(TOP_DIR, "dist", "unpacked", "injected"),
     clean: true,
   };
 
@@ -62,17 +63,41 @@ export async function getConfig(isProd) {
       new RegExp(
         path.resolve(
           MESSAGE_SYSTEMS_DIR,
-          '.*',
-          'handle_async_in_service_worker.ts'
+          ".*",
+          "handle_async_in_service_worker.ts"
         )
       ),
       path.resolve(
         MESSAGE_SYSTEMS_DIR,
-        'noops',
-        'handle_async_in_service_worker.ts'
+        "noops",
+        "handle_async_in_service_worker.ts"
       ),
     ],
   ];
 
-  return getScriptConfig(isProd, entry, output, replacements);
+  const module = {
+    rules: [
+      // ... other rules
+      {
+        test: /\.scss$/,
+        use: [
+          // Creates `style` nodes from JS strings
+          "style-loader",
+          // Translates CSS into CommonJS
+          "css-loader",
+          // Compiles Sass to CSS
+          "sass-loader",
+        ],
+      },
+    ],
+  };
+
+  const plugins = [
+    // ... other plugins
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+    }),
+  ];
+
+  return getScriptConfig(isProd, entry, output, replacements, module, plugins);
 }

@@ -36,7 +36,6 @@ chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
     activeTab.id!,
     createSimpleRequest({ message: "popup-popped" })
   );
-  // chrome.tabs.sendMessage(activeTab.id, { message: "start" });
 });
 
 function get<T = HTMLInputElement>(selector: string): T {
@@ -50,30 +49,8 @@ function get<T = HTMLInputElement>(selector: string): T {
 
 document.addEventListener("DOMContentLoaded", function () {
   new Popup();
-
-  // var form = document.getElementById("options-form")!;
-  // form.addEventListener("submit", function () {
-  //   var feature1Enabled = (
-  //     document.getElementById("feature1") as HTMLInputElement
-  //   ).checked;
-  //   var feature2Enabled = (
-  //     document.getElementById("feature2") as HTMLInputElement
-  //   ).checked;
-  //   const obj = { feature1Enabled, feature2Enabled };
-  //   chrome.storage.sync.set(obj, function () {
-  //     console.log("Options saved.", obj);
-  //   });
-  // });
 });
-// interface Options {
-//   [key: string]: boolean;
-// }
-// function createOption(name: string, id: string) `{
-//   return `<div class="custom-control custom-switch">
-//         <input type="checkbox" class="custom-control-input option-input" id="feature1">
-//         <label class="custom-control-label" for="feature1">Enable Feature 1</label>
-//       </div>`;
-// }
+
 class Popup {
   private options: typeof SettingsManager;
 
@@ -82,6 +59,10 @@ class Popup {
     this.getForm().addEventListener("submit", (e) => {
       e.preventDefault();
       this.saveOptions();
+    });
+    this.getForm().addEventListener("reset", (e) => {
+      e.preventDefault();
+      this.loadOptions(true).then(() => this.bindInputs());
     });
     // this.bindInputs();
   }
@@ -112,11 +93,15 @@ class Popup {
     // });
   }
 
-  private async loadOptions() {
+  private async loadOptions(backToDefault: boolean = false) {
     // Load options from storage
     return new Promise((res, rej) => {
       chrome.storage.sync.get(["settings"], (result) => {
-        if (result.settings && shallowEqual(result.settings, SettingsManager)) {
+        if (
+          !backToDefault &&
+          result.settings &&
+          shallowEqual(result.settings, SettingsManager)
+        ) {
           console.log("found options in settings", result.settings);
           this.options = result.settings;
         } else {
@@ -133,12 +118,19 @@ class Popup {
           }
           this.options = SettingsManager;
         }
+        this.getForm()
+          .querySelectorAll(".custom-gen")
+          .forEach((e) => {
+            e.remove();
+          });
         // Update the input elements
         for (const key in this.options) {
           const option = this.options[key as keyof typeof SettingsManager];
           // const e = get(`#${option.id}`);
           let handle = handler(option);
-          this.getForm().appendChild(handle.createElement(option.id));
+          const gen = handle.createElement(option.id);
+          gen.classList.add("custom-gen");
+          this.getForm().appendChild(gen);
           handle.setValue(option.id, option.value as any);
         }
         res(null);
@@ -149,6 +141,13 @@ class Popup {
     // Save the current state of the options to storage
     chrome.storage.sync.set({ settings: this.options }, () => {
       console.log("Options saved:", this.options);
+      chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+        const activeTab = tabs[0];
+        simpleRequestSystem.sendRequestToTab(
+          activeTab.id!,
+          createSimpleRequest({ message: "settings-change" })
+        );
+      });
     });
   }
 }
@@ -173,10 +172,6 @@ function handler(setting: Setting): Handler {
           div.appendChild(e);
           div.appendChild(lbl);
           return div;
-          //   <div class="custom-control custom-switch">
-          //   <input type="checkbox" class="custom-control-input" id="${option.id}">
-          //   <label class="custom-control-label" for="${option.id}">${option.name}</label>
-          // </div>`;
         },
         getValue(id) {
           const e = get(`#${id}`);

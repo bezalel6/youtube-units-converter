@@ -7,6 +7,7 @@
  * @see [Youtube]{@link https://www.youtube.com/channel/UCrECEffgWKBMCvn5tar9bYw}
  * @see [Medium]{@link https://medium.com/@albert.patterson.code}
  *
+ *
  * Free software under the GPLv3 licence. Permissions of this strong copyleft
  * license are conditioned on making available complete source code of
  * licensed works and modifications, which include larger works using a
@@ -27,6 +28,8 @@ import {
   isOverlayAdded,
   setText,
 } from "./overlay";
+import { updateSettings } from "../../util/settings";
+import { updateSourceFile } from "typescript";
 
 /**
  * handle requests sent via the message system
@@ -36,6 +39,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.data.message == "popup-popped") {
     // run();
     setText("YES I AM HERE");
+  } else if (request.data.message === "settings-change") {
+    updateSettings();
   }
   return handleRequestInTab(request, sender, sendResponse);
 });
@@ -57,10 +62,6 @@ function run() {
     console.error("couldnt get video id");
   }
 }
-// Function to call when URL changes
-// function onUrlChange(url) {
-//   console.log("The URL has changed to: " + url);
-// }
 
 // Listen for popstate event
 window.addEventListener("popstate", function (event) {
@@ -107,6 +108,9 @@ function getVideoId(): string | null {
 
 (async () => {
   console.log(`loaded in ${document.title}`);
+  chrome.storage.sync.get(["settings"], (result) => {
+    console.log(result);
+  });
   run();
   // const result = await simpleRequestSystem.sendRequestToServiceWorker(
   //   createSimpleRequest({ message: msg })
@@ -114,5 +118,3 @@ function getVideoId(): string | null {
   // console.log("received response (from service worker):");
   // logResponse(result);
 })();
-
-//todo overlay the converted text over the video

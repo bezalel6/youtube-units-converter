@@ -1,3 +1,5 @@
+import { recalcCSS } from "../injected/youtube/overlay";
+
 export interface BaseSetting<T> {
   id: string;
   name: string;
@@ -14,34 +16,40 @@ export interface DropdownChoices {
 export interface Dropdown extends BaseSetting<DropdownChoices> {
   type: "dropdown";
 }
-export type Setting = Checkbox | Dropdown;
 
-export const SettingsManager = {
+export type Setting = Checkbox | Dropdown;
+export let SettingsManager = {
   enabled: {
     type: "checkbox" as const,
     value: true,
     id: "enabled",
-    name: "Enabled",
-  },
-  darkMode: {
-    type: "checkbox" as const,
-    value: true,
-    id: "dark-mode",
-    name: "Dark mode",
+    name: "Enable converter",
   },
   textSize: {
     type: "dropdown" as const,
-    value: { choices: ["meow", "joe biden 👌"], selected: 0 },
+    value: {
+      choices: ["2.5rem", "2rem", "1.5rem", "1rem"],
+      selected: 0,
+    },
     id: "textSize",
     name: "Text Size",
   },
+  textColor: {
+    type: "dropdown" as const,
+    value: {
+      choices: ["white", "blue", "aqua"],
+      selected: 0,
+    },
+    id: "textClr",
+    name: "Text Color",
+  },
 };
-
-// // type Option<T> = T extends boolean ?// Create function overloads
-// function createOption(option: Checkbox): void;
-// function createOption(option: Dropdown): void;
-
-// // Implement the function with a generic parameter
-// function createOption(option: Setting) {}
-// // function createOption<T>(option: Option<T>) {}
-// createOption(SettingsManager.d);
+export type Settings = typeof SettingsManager;
+export function updateSettings() {
+  chrome.storage.sync.get(["settings"], (result) => {
+    const newSettings = result.settings;
+    SettingsManager = newSettings;
+    recalcCSS();
+    console.log("updated settings", newSettings);
+  });
+}

@@ -1,14 +1,16 @@
+import { SettingsManager, updateSettings } from "../../util/settings";
 import { Captions } from "./captions";
-
-const txtId = "my-txt";
+import { CONSTS, setCSS } from "./eCSS";
 
 export function setText(str: string) {
   // console.log("text set to", str, "caller", arguments.callee.caller.name);
 
-  (document.querySelector(`#${txtId}`) as HTMLDivElement).innerText = str;
+  (
+    document.querySelector(`#${CONSTS.overlayText}`) as HTMLDivElement
+  ).innerText = str;
 }
 export function isOverlayAdded() {
-  return !!document.querySelector("#custom-overlay");
+  return !!document.querySelector(`#${CONSTS.overlay}`);
 }
 // Function to create the overlay
 export function createOverlay() {
@@ -20,27 +22,32 @@ export function createOverlay() {
   } else if (videoElement) {
     // Create overlay element
     const overlay = document.createElement("div");
-    overlay.id = "custom-overlay";
-    overlay.style.position = "absolute";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.webkitTextStroke = "3px black";
-    // overlay.style.width = "100%";
-    // overlay.style.height = "100%";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.fontSize = "2.5rem";
-    overlay.style.color = "white";
-    overlay.style.zIndex = "100";
-    overlay.style.pointerEvents = "none";
-    overlay.style.textShadow = "12px -9px 3px rgba(0, 0, 0, 0.5)";
-    overlay.innerHTML = `<h1 id="${txtId}"></h1>`;
+    overlay.id = `${CONSTS.overlay}`;
+
+    // overlay.style.position = "absolute";
+    // overlay.style.top = "0";
+    // overlay.style.left = "0";
+    // overlay.style.webkitTextStroke = "3px black";
+    // // overlay.style.width = "100%";
+    // // overlay.style.height = "100%";
+    // overlay.style.display = "flex";
+    // overlay.style.alignItems = "center";
+    // overlay.style.justifyContent = "center";
+    // overlay.style.fontSize = "2.5rem";
+    // overlay.style.color = "white";
+    // overlay.style.zIndex = "100";
+    // overlay.style.pointerEvents = "none";
+    // overlay.style.textShadow = "12px -9px 3px rgba(0, 0, 0, 0.5)";
+    overlay.innerHTML = `<h1 id="${CONSTS.overlayText}"></h1>`;
     // Append overlay to video element
     videoElement.appendChild(overlay);
+    updateSettings();
     return true;
   }
   return false;
+}
+export function recalcCSS() {
+  setCSS({ settings: SettingsManager });
 }
 const scheduledCallbacks: Array<ScheduledCallback> = [];
 export function captionsSetup(captions: Captions) {
