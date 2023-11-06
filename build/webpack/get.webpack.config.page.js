@@ -43,7 +43,7 @@ const createHtmlWebpackPlugin = function (opts, inputFolderPath) {
 
 const createSCSSModuleRule = function (cssLoader) {
   return {
-    test: /\.scss$/,
+    test: /\.css|\.scss$/,
     use: [cssLoader, 'css-loader', 'sass-loader'],
   };
 };

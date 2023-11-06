@@ -18,12 +18,19 @@ export interface Dropdown extends BaseSetting<DropdownChoices> {
 }
 
 export type Setting = Checkbox | Dropdown;
+
 export let SettingsManager = {
   enabled: {
     type: "checkbox" as const,
     value: true,
     id: "enabled",
     name: "Enable converter",
+  },
+  testing: {
+    type: "checkbox" as const,
+    value: false,
+    id: "testing",
+    name: "Test",
   },
   textSize: {
     type: "dropdown" as const,

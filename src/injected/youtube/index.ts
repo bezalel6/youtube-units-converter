@@ -21,7 +21,7 @@ import {
   simpleRequestSystem,
   createSimpleRequest,
 } from "../../messaging/request_systems/simple_request";
-import { transcribe } from "./transcriber";
+import {NotConnectedToServerErr, transcribe} from "./transcriber";
 import {
   captionsSetup,
   createOverlay,
@@ -30,7 +30,8 @@ import {
 } from "./overlay";
 import { updateSettings } from "../../util/settings";
 import { updateSourceFile } from "typescript";
-
+import {log} from "./logger";
+import "./styles.css"
 /**
  * handle requests sent via the message system
  */
@@ -38,7 +39,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log("received request in tab", request);
   if (request.data.message == "popup-popped") {
     // run();
-    setText("testing-testing-123");
   } else if (request.data.message === "settings-change") {
     updateSettings();
   }
@@ -52,11 +52,18 @@ function run() {
     if (isOverlayAdded()) {
       console.log("overlay exists. not recreating");
     } else {
-      transcribe(videoId).then((captions) => {
-        console.log(captions);
-        createOverlay();
-        captionsSetup(captions);
-      });
+      transcribe(videoId)
+        .then((captions) => {
+          console.log(captions);
+          createOverlay();
+          captionsSetup(captions);
+        })
+        .catch(e=>{
+          // if(e instanceof  NotConnectedToServerErr){
+            log("not connected to server","error")
+          // }
+
+        });
     }
   } else {
     console.error("couldnt get video id");
@@ -98,18 +105,31 @@ observer.observe(document.body, config);
 /**
  * Top level extension logic
  */
+// function getVideoId(): string | null {
+//   const url = window.location.href;
+//   const urlObj = new URL(url);
+//   const params = new URLSearchParams(urlObj.search);
+//   if (!params.has("v")) return null;
+//   return params.get("v");
+// }
+
 function getVideoId() {
   const url = window.location.href;
+  console.log("looking for video id in ", url);
   // Check if URL is a YouTube Shorts URL
   if (url.includes("youtube.com/shorts/")) {
+    console.log("--shorts detected--");
     // Extract the video ID from the Shorts URL
     const shortsId = url.split("youtube.com/shorts/")[1];
     return shortsId ? shortsId.split("?")[0] : null; // Split at '?' to ensure only the ID is returned
   } else {
+    console.log("not shorts.");
     // Proceed with the original logic for regular YouTube URLs
     const urlObj = new URL(url);
     const params = new URLSearchParams(urlObj.search);
-    return params.has("v") ? params.get("v") : null;
+    const res = params.has("v") ? params.get("v") : null;
+    console.log("returning", res);
+    return res;
   }
 }
 

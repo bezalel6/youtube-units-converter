@@ -31,7 +31,7 @@ export function setCSS({ settings }: cssProps): CSS {
       settings.textColor.value.choices[settings.textColor.value.selected]
     )
     .s("zIndex", "100")
-    .s("pointerEvents", "none")
+    // .s("pointerEvents", "none")
     .build();
   css += overlay;
   css += new CSSBuilder(`#${CONSTS.overlayText}`)
@@ -40,6 +40,7 @@ export function setCSS({ settings }: cssProps): CSS {
       settings.textSize.value.choices[settings.textSize.value.selected],
       true
     )
+      .s("userSelect","none")
     .s("textShadow", "12px -9px 3px rgba(0, 0, 0, 0.5)")
     .build();
   //   console.log("css", css);

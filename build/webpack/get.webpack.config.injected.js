@@ -39,12 +39,12 @@ async function getEntry() {
   const context = getContext();
 
   const names = await getDirs(context);
-
   const entry = {};
   for (const name of names) {
     const dir = path.resolve(context, name);
     const indexName = await getFileWithName(dir, "index", ["js", "ts"]);
     entry[name] = path.resolve(context, name, indexName);
+    console.log({name,dir,indexName,entry:entry[name]})
   }
 
   return entry;
@@ -79,7 +79,7 @@ export async function getConfig(isProd) {
     rules: [
       // ... other rules
       {
-        test: /\.scss$/,
+        test: /\.css|\.scss$/,
         use: [
           // Creates `style` nodes from JS strings
           "style-loader",

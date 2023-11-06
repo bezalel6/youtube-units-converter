@@ -9,14 +9,23 @@ import {
   unitMapping,
 } from "./captions";
 import { numberifyText } from "numberify-text";
+// import { err } from "./logger";
 const SERVER_URL = "http://localhost:3000/transcript/";
+
+export class NotConnectedToServerErr extends Error {
+
+  constructor(message: string) {
+    super(message);
+  }
+
+}
 
 export async function transcribe(videoId: string): Promise<Captions> {
   return fetch(SERVER_URL + videoId)
     .then((res) => res.json())
     .then((cap) => {
       return filter(cap as RawCaptions);
-    });
+    })
 }
 
 export function filter(rawCaptions: RawCaptions) {
