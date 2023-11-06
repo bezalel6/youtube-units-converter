@@ -1,7 +1,10 @@
-import {SettingsManager, updateSettings} from "../../util/settings";
-import {Captions} from "./captions";
+import {getSettings, Settings, SettingsManager, updateSettings} from "../../util/settings";
+import {Captions, Convertable} from "./captions";
 import {CONSTS, setCSS} from "./eCSS";
 import {addDragListener} from "../../util/MouseDragListener";
+import convert from 'convert'
+//
+console.log("converted:", convert(13, "km").to("best", "imperial"))
 
 export function setText(str: string) {
     // console.log("text set to", str, "caller", arguments.callee.caller.name);
@@ -44,7 +47,9 @@ const scheduledCallbacks: Array<ScheduledCallback> = [];
 
 export function captionsSetup(captions: Captions) {
     captions.captions.forEach((c) => {
+
         scheduledCallbacks.push({
+            convertable: c.convertable,
             text: c.text,
             time: c.start,
             duration: c.duration,
@@ -61,20 +66,29 @@ interface ScheduledCallback {
     time: number;
     text: string;
     duration: number;
+    convertable: Convertable;
     // ttl: number;
+}
+
+function convertUnit(convertable: Convertable, settings: Settings) {
+    return "hello world"
+    // return convert(convertable.amount, convertable.unit as any).to("best", settings.unitSelection.value as any)
 }
 
 function onTimeUpdate() {
     const videoElement = document.querySelector("video")!;
 
+
     let str = "";
-    scheduledCallbacks.forEach((scheduled) => {
+    scheduledCallbacks.forEach(async (scheduled) => {
         const diff = videoElement.currentTime - scheduled.time;
         if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
-            console.log("running ", scheduled.text);
-
+            // const txt = convertUnit(scheduled.convertable, await getSettings());
+            const txt = convertUnit(scheduled.convertable, await getSettings());
+            // const txt = "fuck its the settings manager"
+            console.log("running ", txt);
             if (str.length) str += "\n";
-            str += scheduled.text;
+            str += txt;
         }
         // else {
         //   setText("");

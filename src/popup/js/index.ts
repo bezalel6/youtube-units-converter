@@ -20,13 +20,13 @@ import {createSimpleRequest, simpleRequestSystem,} from "../../messaging/request
 import {DropdownChoices, Setting, SettingsManager,} from "../../util/settings";
 import {shallowEqual} from "../../util/utils";
 
-chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
-    const activeTab = tabs[0];
-    simpleRequestSystem.sendRequestToTab(
-        activeTab.id!,
-        createSimpleRequest({message: "popup-popped"})
-    );
-});
+// chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+//     const activeTab = tabs[0];
+//     simpleRequestSystem.sendRequestToTab(
+//         activeTab.id!,
+//         createSimpleRequest({message: "popup-popped"})
+//     );
+// });
 
 function get<T = HTMLInputElement>(selector: string): T {
     const e = document.querySelector(selector);

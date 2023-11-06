@@ -64,6 +64,16 @@ export let SettingsManager = {
 };
 export type Settings = typeof SettingsManager;
 
+export async function getSettings(): Promise<Settings> {
+    return new Promise<Settings>((res, rej) => {
+        chrome.storage.sync.get(["settings"], (result) => {
+            const newSettings = result.settings;
+            SettingsManager = newSettings;
+            res(newSettings)
+        });
+    })
+}
+
 export function updateSettings() {
     chrome.storage.sync.get(["settings"], (result) => {
         const newSettings = result.settings;
