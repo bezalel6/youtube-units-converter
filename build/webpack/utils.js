@@ -18,7 +18,7 @@ export function getTsCompilerOptions(isProd) {
     const prodOptions = {
         outDir: './dist/unpacked',
         noImplicitAny: true,
-        module: 'es6',
+        module: 'es2022',
         target: 'es6',
         jsx: 'react',
         allowJs: true,

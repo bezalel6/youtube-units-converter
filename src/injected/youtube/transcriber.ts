@@ -71,8 +71,8 @@ export function filter(rawCaptions: RawCaptions) {
         }
         lastLine = caption;
     }
-
-    return transform(captions);
+    return captions;
+    // return transform(captions);
 }
 
 

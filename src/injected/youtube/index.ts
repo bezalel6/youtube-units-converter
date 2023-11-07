@@ -15,75 +15,65 @@
  * be preserved. Contributors provide an express grant of patent rights.
  */
 
-import { handleRequestInTab } from "../../messaging/framework/handle_request";
-import { logResponse } from "../../messaging/util";
-import {
-  simpleRequestSystem,
-  createSimpleRequest,
-} from "../../messaging/request_systems/simple_request";
-import {NotConnectedToServerErr, transcribe} from "./transcriber";
-import {
-  captionsSetup,
-  createOverlay,
-  isOverlayAdded,
-  setText,
-} from "./overlay";
-import { updateSettings } from "../../util/settings";
-import { updateSourceFile } from "typescript";
+import {handleRequestInTab} from "../../messaging/framework/handle_request";
+import {transcribe} from "./transcriber";
+import {captionsSetup, createOverlay, isOverlayAdded,} from "./overlay";
+import {updateSettings} from "../../util/settings";
 import {log} from "./logger";
 import "./styles.css"
+
 /**
  * handle requests sent via the message system
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("received request in tab", request);
-  if (request.data.message == "popup-popped") {
-    // run();
-  } else if (request.data.message === "settings-change") {
-    updateSettings();
-  }
-  return handleRequestInTab(request, sender, sendResponse);
+    console.log("received request in tab", request);
+    if (request.data.message == "popup-popped") {
+        // run();
+    } else if (request.data.message === "settings-change") {
+        updateSettings();
+    }
+    return handleRequestInTab(request, sender, sendResponse);
 });
 
 function run() {
-  console.log("running...");
-  const videoId = getVideoId();
-  if (videoId) {
-    if (isOverlayAdded()) {
-      console.log("overlay exists. not recreating");
-    } else {
-      transcribe(videoId)
-        .then((captions) => {
-          console.log(captions);
-          createOverlay();
-          captionsSetup(captions);
-        })
-        .catch(e=>{
-          // if(e instanceof  NotConnectedToServerErr){
-            log("not connected to server","error")
-          // }
+    console.log("running...");
+    const videoId = getVideoId();
+    if (videoId) {
+        if (isOverlayAdded()) {
+            console.log("overlay exists. not recreating");
+        } else {
+            transcribe(videoId)
+                .then((captions) => {
+                    console.log(captions);
+                    createOverlay();
+                    captionsSetup(captions);
+                })
+                .catch(e => {
+                    // if(e instanceof  NotConnectedToServerErr){
+                    log("not connected to server", "error")
+                    // }
 
-        });
+                });
+        }
+    } else {
+        console.error("couldnt get video id");
     }
-  } else {
-    console.error("couldnt get video id");
-  }
 }
 
 // Listen for popstate event
 window.addEventListener("popstate", function (event) {
-  // onUrlChange(document.location.href);
-  console.log("popstate event");
-  run();
+    // onUrlChange(document.location.href);
+    console.log("popstate event");
+    run();
 });
 window.addEventListener("DOMContentLoaded", function (event) {
-  // onUrlChange(document.location.href);
-  console.log("doc content loaded");
-  run();
+    // onUrlChange(document.location.href);
+    console.log("doc content loaded");
+    run();
 });
 
 // Observe the body or a specific element that changes when navigating to a new video
-const config = { childList: true, subtree: true };
+const config = {childList: true, subtree: true};
 
 // Store the current URL for comparison
 let currentUrl = document.location.href;
@@ -91,14 +81,14 @@ let currentUrl = document.location.href;
 // Create a mutation observer to listen for changes in the DOM
 // It could indicate a change in content without a popstate event
 var observer = new MutationObserver(function (mutations) {
-  mutations.forEach(function (mutation) {
-    // Check if the URL has changed
-    if (document.location.href !== currentUrl) {
-      // onUrlChange(document.location.href);
-      currentUrl = document.location.href; // Update the current URL
-      run();
-    }
-  });
+    mutations.forEach(function (mutation) {
+        // Check if the URL has changed
+        if (document.location.href !== currentUrl) {
+            // onUrlChange(document.location.href);
+            currentUrl = document.location.href; // Update the current URL
+            run();
+        }
+    });
 });
 observer.observe(document.body, config);
 
@@ -114,34 +104,39 @@ observer.observe(document.body, config);
 // }
 
 function getVideoId() {
-  const url = window.location.href;
-  console.log("looking for video id in ", url);
-  // Check if URL is a YouTube Shorts URL
-  if (url.includes("youtube.com/shorts/")) {
-    console.log("--shorts detected--");
-    // Extract the video ID from the Shorts URL
-    const shortsId = url.split("youtube.com/shorts/")[1];
-    return shortsId ? shortsId.split("?")[0] : null; // Split at '?' to ensure only the ID is returned
-  } else {
-    console.log("not shorts.");
-    // Proceed with the original logic for regular YouTube URLs
-    const urlObj = new URL(url);
-    const params = new URLSearchParams(urlObj.search);
-    const res = params.has("v") ? params.get("v") : null;
-    console.log("returning", res);
-    return res;
-  }
+    const url = window.location.href;
+    console.log("looking for video id in ", url);
+    // Check if URL is a YouTube Shorts URL
+    if (url.includes("youtube.com/shorts/")) {
+        console.log("--shorts detected--");
+        // Extract the video ID from the Shorts URL
+        const shortsId = url.split("youtube.com/shorts/")[1];
+        return shortsId ? shortsId.split("?")[0] : null; // Split at '?' to ensure only the ID is returned
+    } else {
+        console.log("not shorts.");
+        // Proceed with the original logic for regular YouTube URLs
+        const urlObj = new URL(url);
+        const params = new URLSearchParams(urlObj.search);
+        const res = params.has("v") ? params.get("v") : null;
+        console.log("returning", res);
+        return res;
+    }
 }
 
 (async () => {
-  console.log(`loaded in ${document.title}`);
-  chrome.storage.sync.get(["settings"], (result) => {
-    console.log(result);
-  });
-  run();
-  // const result = await simpleRequestSystem.sendRequestToServiceWorker(
-  //   createSimpleRequest({ message: msg })
-  // );
-  // console.log("received response (from service worker):");
-  // logResponse(result);
+    console.log(`loaded in ${document.title}`);
+    chrome.storage.sync.get(["settings"], (result) => {
+        console.log(result);
+    });
+    run();
+
+    // const {convert} = await import("convert")
+//
+//     console.log("converted:", convert(13, "km").to("best", "imperial"))
+    // const result = await simpleRequestSystem.sendRequestToServiceWorker(
+    //   createSimpleRequest({ message: msg })
+    // );
+    // console.log("received response (from service worker):");
+    // logResponse(result);
 })();
+

@@ -1,13 +1,11 @@
-import {getSettings, Settings, SettingsManager, updateSettings} from "../../util/settings";
+import {getSettings, SettingsManager, updateSettings} from "../../util/settings";
 import {Captions, Convertable} from "./captions";
 import {CONSTS, setCSS} from "./eCSS";
 import {addDragListener} from "../../util/MouseDragListener";
-import convert from 'convert'
-//
-console.log("converted:", convert(13, "km").to("best", "imperial"))
+
 
 export function setText(str: string) {
-    // console.log("text set to", str, "caller", arguments.callee.caller.name);
+    // console.log("text set to", str);
 
     (
         document.querySelector(`#${CONSTS.overlayText}`) as HTMLDivElement
@@ -70,41 +68,43 @@ interface ScheduledCallback {
     // ttl: number;
 }
 
-function convertUnit(convertable: Convertable, settings: Settings) {
-    return "hello world"
-    // return convert(convertable.amount, convertable.unit as any).to("best", settings.unitSelection.value as any)
+export async function makeConvertable(convertable: Convertable, metric: boolean) {
+    return import('convert').then(({convert}) => {
+
+        return convertable.amount + " " + convertable.unit + " = " + convert(convertable.amount, convertable.unit as any).to("best", metric ? "metric" : "imperial").toString(0)
+    })
 }
 
 function onTimeUpdate() {
     const videoElement = document.querySelector("video")!;
 
+    async function asyncF() {
 
-    let str = "";
-    scheduledCallbacks.forEach(async (scheduled) => {
-        const diff = videoElement.currentTime - scheduled.time;
-        if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
-            // const txt = convertUnit(scheduled.convertable, await getSettings());
-            const txt = convertUnit(scheduled.convertable, await getSettings());
-            // const txt = "fuck its the settings manager"
-            console.log("running ", txt);
-            if (str.length) str += "\n";
-            str += txt;
+        let str = "";
+        for (const scheduled of scheduledCallbacks) {
+            const diff = videoElement.currentTime - scheduled.time;
+            if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
+                // const txt = convertUnit(scheduled.convertable, await getSettings());
+                const settings = (await getSettings());
+                const txt = await makeConvertable(scheduled.convertable, settings.unitSelection.value.choices[settings.unitSelection.value.selected] === "metric");
+                // const txt = "fuck its the settings manager"
+                console.log("running ", txt);
+                if (str.length) str += "\n";
+
+                str += txt;
+            }
         }
-        // else {
-        //   setText("");
-        // }
-        // Remove the event listener to ensure the callback is only called once
-        // videoElement.removeEventListener("timeupdate", onTimeUpdate);
-        // Call the callback
-        // callback();
-    });
-    if (!str.length) {
-        if (SettingsManager.testing.value) {
-            setText("testing testing 123");
-        } else {
-            setText("");
-        }
-    } else setText(str);
+        // console.log("done calling callbacks. str is", str)
+        if (!str.length) {
+            if (SettingsManager.testing.value) {
+                setText("testing testing 123");
+            } else {
+                setText("");
+            }
+        } else setText(str);
+    }
+
+    asyncF()
 }
 
 /**
@@ -114,6 +114,7 @@ function onTimeUpdate() {
  *
  */
 function setupTimeUpdateCallback() {
+    console.log("setting time update callback")
     // Get the underlying video element
     const videoElement = document.querySelector("video");
     if (videoElement) {
