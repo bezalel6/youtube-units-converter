@@ -27,6 +27,7 @@ export function createOverlay() {
         // Create overlay element
         const overlay = document.createElement("div");
         overlay.id = `${CONSTS.overlay}`;
+
         overlay.innerHTML = `<h1 id="${CONSTS.overlayText}"></h1>`;
         // Append overlay to video element
         videoElement.appendChild(overlay);
@@ -38,6 +39,7 @@ export function createOverlay() {
 }
 
 export function recalcCSS() {
+
     setCSS({settings: SettingsManager});
 }
 

@@ -17,7 +17,7 @@
 
 import {handleRequestInTab} from "../../messaging/framework/handle_request";
 import {transcribe} from "./transcriber";
-import {captionsSetup, createOverlay, isOverlayAdded,} from "./overlay";
+import {captionsSetup, createOverlay, isOverlayAdded, recalcCSS,} from "./overlay";
 import {updateSettings} from "../../util/settings";
 import {log} from "./logger";
 import "./styles.css"
@@ -31,6 +31,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // run();
     } else if (request.data.message === "settings-change") {
         updateSettings();
+        recalcCSS();
     }
     return handleRequestInTab(request, sender, sendResponse);
 });

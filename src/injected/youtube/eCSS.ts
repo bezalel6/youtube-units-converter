@@ -33,7 +33,6 @@ export function setCSS({settings}: cssProps): CSS {
             settings.textColor.value.choices[settings.textColor.value.selected]
         )
         .s("zIndex", "100")
-        // .s("pointerEvents", "none")
         .build();
     css += overlay;
     css += new CSSBuilder(`#${CONSTS.overlayText}`)
@@ -44,6 +43,8 @@ export function setCSS({settings}: cssProps): CSS {
         ).s("direction", "ltr")
         .s("userSelect", "none")
         .s("textShadow", "12px -9px 3px rgba(0, 0, 0, 0.5)")
+        .s("textAlign", "center")
+        .s("border",settings.)
         .build();
     //   console.log("css", css);
     injectCSS(css);
