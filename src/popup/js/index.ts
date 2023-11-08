@@ -17,7 +17,7 @@
 import "../scss/styles.scss";
 
 import {createSimpleRequest, simpleRequestSystem,} from "../../messaging/request_systems/simple_request";
-import {DropdownChoices, PositionAdjustValue, Setting, SettingsManager,} from "../../util/settings";
+import {DropdownChoices, PositionAdjustValue, saveSettings, Setting, SettingsManager,} from "../../util/settings";
 import {shallowEqual} from "../../util/utils";
 
 // chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
@@ -51,7 +51,7 @@ class Popup {
     private options: typeof SettingsManager;
 
     constructor() {
-        this.loadOptions().then(() => this.bindInputs());
+        this.loadOptions().then(() => this.bindInputs()).then(() => saveSettings(this.options));
         this.getForm().addEventListener("submit", (e) => {
             e.preventDefault();
             this.saveOptions();
@@ -116,6 +116,7 @@ class Popup {
                         );
                     }
                     this.options = SettingsManager;
+
                 }
                 this.getForm().querySelectorAll(':scope > :not(.stay-btn)').forEach(child => {
                     this.getForm().removeChild(child);
@@ -170,6 +171,37 @@ function closePopup() {
 // function handler(setting: Dropdown): Handler;
 function handler(setting: Setting): Handler {
     switch (setting.type) {
+
+        case "checkbox":
+            return {
+                createElement(id) {
+                    const div = document.createElement("div");
+                    div.className = "custom-control custom-switch mb-2"; // Bootstrap switch class with margin-bottom
+                    const input = document.createElement("input");
+                    input.type = "checkbox";
+                    input.className = "custom-control-input"; // Bootstrap input class
+                    input.id = id;
+                    const label = document.createElement("label");
+                    label.className = "custom-control-label"; // Bootstrap label class
+                    label.htmlFor = id;
+                    label.textContent = setting.name;
+                    div.appendChild(input);
+                    div.appendChild(label);
+                    return div;
+                },
+                getValue(id) {
+                    const e = get(`#${id}`);
+                    return {
+                        id: id,
+                        name: setting.name,
+                        type: setting.type,
+                        value: e.checked,
+                    };
+                },
+                setValue(id, value) {
+                    get(`#${id}`).checked = value as boolean;
+                },
+            };
         case "positionAdj":
             return {
                 createElement(id) {
@@ -217,36 +249,6 @@ function handler(setting: Setting): Handler {
                     e.setAttribute("pos", JSON.stringify(cVal.pos))
                     e.setAttribute("checked", cVal.isMoving + "");
 
-                },
-            };
-        case "checkbox":
-            return {
-                createElement(id) {
-                    const div = document.createElement("div");
-                    div.className = "custom-control custom-switch mb-2"; // Bootstrap switch class with margin-bottom
-                    const input = document.createElement("input");
-                    input.type = "checkbox";
-                    input.className = "custom-control-input"; // Bootstrap input class
-                    input.id = id;
-                    const label = document.createElement("label");
-                    label.className = "custom-control-label"; // Bootstrap label class
-                    label.htmlFor = id;
-                    label.textContent = setting.name;
-                    div.appendChild(input);
-                    div.appendChild(label);
-                    return div;
-                },
-                getValue(id) {
-                    const e = get(`#${id}`);
-                    return {
-                        id: id,
-                        name: setting.name,
-                        type: setting.type,
-                        value: e.checked,
-                    };
-                },
-                setValue(id, value) {
-                    get(`#${id}`).checked = value as boolean;
                 },
             };
         case "dropdown":

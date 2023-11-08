@@ -100,9 +100,12 @@ export async function saveSettings(settings: Settings) {
 export async function getSettings(): Promise<Settings> {
     return new Promise<Settings>((res, rej) => {
         chrome.storage.sync.get(["settings"], (result) => {
-            const newSettings = result.settings;
-            SettingsManager = newSettings;
-            res(newSettings)
+            if (result.settings) {
+                const newSettings = result.settings;
+                SettingsManager = newSettings;
+
+            }
+            res(SettingsManager)
         });
     })
 }
@@ -110,8 +113,13 @@ export async function getSettings(): Promise<Settings> {
 export function updateSettings() {
     chrome.storage.sync.get(["settings"], (result) => {
         const newSettings = result.settings;
-        SettingsManager = newSettings;
+        if (newSettings) {
+            SettingsManager = newSettings;
+
+            console.log("updated settings", newSettings);
+        } else {
+            console.log("no saved settings. using default values")
+        }
         recalcCSS();
-        console.log("updated settings", newSettings);
     });
 }
