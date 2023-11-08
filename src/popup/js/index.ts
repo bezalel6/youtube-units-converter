@@ -17,8 +17,7 @@
 import "../scss/styles.scss";
 
 import {createSimpleRequest, simpleRequestSystem,} from "../../messaging/request_systems/simple_request";
-import {DropdownChoices, PositionAdjustValue, saveSettings, Setting, SettingsManager,} from "../../util/settings";
-import {shallowEqual} from "../../util/utils";
+import {Setting, Settings, settingsManager} from "../../util/settings"; // Adjust the import path as necessary
 
 // chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
 //     const activeTab = tabs[0];
@@ -27,149 +26,263 @@ import {shallowEqual} from "../../util/utils";
 //         createSimpleRequest({message: "popup-popped"})
 //     );
 // });
+//
+// document.addEventListener("DOMContentLoaded", function () {
+//     new Popup();
+//
+//     get("#delete-storage").onclick = () => {
+//         chrome.storage.sync.remove(["settings"]).then(() => {
+//             console.log("deleted storage")
+//         });
+//     }
+// });
+//
+// class Popup {
+//     // private options: typeof SettingsManager;
+//
+//     constructor() {
+//         this.loadOptions().then(() => this.bindInputs()).then(() => saveSettings(this.options));
+//         this.getForm().addEventListener("submit", (e) => {
+//             e.preventDefault();
+//             this.saveOptions();
+//         });
+//         this.getForm().addEventListener("reset", (e) => {
+//             e.preventDefault();
+//             this.loadOptions(true).then(() => this.bindInputs());
+//         });
+//         // this.bindInputs();
+//     }
+//
+//     private getForm() {
+//         return get<HTMLFormElement>("#options-form");
+//     }
+//
+//     private bindInputs(): void {
+//         console.log("binding!");
+//         for (const optionKey in this.options) {
+//             const option = this.options[optionKey as keyof typeof SettingsManager];
+//             const e = get(`#${option.id}`);
+//             console.log("adding change listener to", e);
+//             e.addEventListener("change", (ev) => {
+//                 option.value = handler(option).getValue(option.id).value as any;
+//                 console.log("change", ev, "setting value", option.value);
+//                 this.saveOptions();
+//             });
+//         }
+//         // Bind change events to all inputs with the 'option-input' class
+//         // const inputs = document.querySelectorAll(".option-input");
+//         // inputs.forEach((input) => {
+//         //   // Initialize the state of the options
+//         //   const checkbox = input as HTMLInputElement;
+//         //   this.options[checkbox.id] = checkbox.checked;
+//         //   // Listen for changes on each input
+//         //   checkbox.addEventListener("change", () => {
+//         //     this.options[checkbox.id] = checkbox.checked;
+//         //   });
+//         // });
+//     }
+//
+//     private async loadOptions(backToDefault: boolean = false) {
+//         // Load options from storage
+//         return new Promise((res, rej) => {
+//             chrome.storage.sync.get(["settings"], (result) => {
+//                 if (
+//                     !backToDefault &&
+//                     result.settings &&
+//                     shallowEqual(result.settings, SettingsManager)
+//                 ) {
+//                     console.log("found options in settings", result.settings);
+//                     this.options = result.settings;
+//                 } else {
+//                     if (
+//                         result.settings &&
+//                         !shallowEqual(result.settings, SettingsManager)
+//                     ) {
+//                         console.log(
+//                             "shallow equal didnt work. storage:",
+//                             result.settings,
+//                             "going with default settings",
+//                             SettingsManager
+//                         );
+//                     }
+//                     this.options = SettingsManager;
+//
+//                 }
+//                 this.getForm().querySelectorAll(':scope > :not(.stay-btn)').forEach(child => {
+//                     this.getForm().removeChild(child);
+//                 });
+//                 // Update the input elements
+//                 const elements: Element[] = []
+//                 for (const key in this.options) {
+//                     const option = this.options[key as keyof typeof SettingsManager];
+//                     // const e = get(`#${option.id}`);
+//                     let handle = handler(option);
+//                     const gen = handle.createElement(option.id);
+//                     gen.classList.add("custom-gen");
+//                     console.log('creating element', key)
+//                     elements.push(gen)
+//                     // this.getForm().prepend(gen);
+//                     // handle.setValue(option.id, option.value as any);
+//                 }
+//                 this.getForm().prepend(...elements)
+//                 for (const key in this.options) {
+//                     const option = this.options[key as keyof typeof SettingsManager];
+//                     // const e = get(`#${option.id}`);
+//                     let handle = handler(option);
+//                     handle.setValue(option.id, option.value as any);
+//                 }
+//                 res(null);
+//             });
+//         });
+//     }
+//
+//     private saveOptions(): void {
+//         // Save the current state of the options to storage
+//         chrome.storage.sync.set({settings: this.options}, () => {
+//             console.log("Options saved:", this.options);
+//             chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+//                 const activeTab = tabs[0];
+//                 simpleRequestSystem.sendRequestToTab(
+//                     activeTab.id!,
+//                     createSimpleRequest({message: "settings-change"})
+//                 );
+//             });
+//         });
+//     }
+// }
 
-function get<T = HTMLInputElement>(selector: string): T {
-    const e = document.querySelector(selector);
-    if (!e) {
-        console.error("COULD NOT FIND SELECTOR: ", selector);
+
+// function handler(setting: Checkbox): Handler;
+// function handler(setting: Dropdown): Handler;
+
+// interface Handler {
+//     getValue: (id: string) => Setting;
+//     setValue: (id: string, value: Setting["value"]) => void;
+//     createElement: (id: string) => Element;
+//     bind?: () => void;
+// }
+
+/**
+ * @file
+ * ... (Author comments and metadata remain unchanged)
+ */
+
+function get<T extends HTMLElement>(selector: string): T {
+    if (selector === "#") {
+
+        throw new Error("trying to get empty id")
+    }
+    const element = document.querySelector(selector);
+    if (!element) {
+        console.error("Could not find selector: ", selector);
         throw new Error("Selector not found");
     }
-    return e as unknown as T;
+    return element as T;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    new Popup();
-
-    get("#delete-storage").onclick = () => {
-        chrome.storage.sync.remove(["settings"]).then(() => {
-            console.log("deleted storage")
-        });
-    }
+document.addEventListener("DOMContentLoaded", async () => {
+    const popup = new Popup();
+    await popup.loadOptions();
+    popup.bindInputs();
 });
 
 class Popup {
-    private options: typeof SettingsManager;
+    private options: ReturnType<typeof settingsManager['getAllSettings']>;
 
     constructor() {
-        this.loadOptions().then(() => this.bindInputs()).then(() => saveSettings(this.options));
-        this.getForm().addEventListener("submit", (e) => {
-            e.preventDefault();
-            this.saveOptions();
+        this.options = settingsManager.getAllSettings();
+    }
+
+    public static close() {
+        var daddy = window.self;
+        daddy.opener = window.self;
+        daddy.close();
+    }
+
+    async loadOptions(): Promise<void> {
+        await settingsManager.loadSettings();
+        this.bindInputs();
+    }
+
+    bindInputs(): void {
+        const form = this.getForm();
+        form.innerHTML = ''; // Reset the form UI
+
+        Object.keys(this.options).forEach((key) => {
+            // Assert 'key' is actually a keyof Settings
+            const optionKey = key as keyof Settings;
+            // const option = this.options[optionKey];
+            const option = this.options[optionKey];
+            const inputElement = createInputForSetting(optionKey, option);
+            // form.appendChild(inputElement);
+            console.log('before setting value for input', {optionKey, option, inputElement})
+            // Now TypeScript knows that 'inputElement' is associated with a key of 'Settings'
+            setValueForInput(inputElement, option);
+            console.log('after setting value for input', {optionKey, option})
+
+            inputElement.addEventListener('change', () => {
+                const newValue = getValueFromInput(inputElement);
+                // Again, assert that 'optionKey' is a keyof Settings
+                settingsManager.updateSetting(optionKey, newValue);
+            });
         });
-        this.getForm().addEventListener("reset", (e) => {
-            e.preventDefault();
-            this.loadOptions(true).then(() => this.bindInputs());
-        });
-        // this.bindInputs();
+
     }
 
     private getForm() {
         return get<HTMLFormElement>("#options-form");
     }
 
-    private bindInputs(): void {
-        console.log("binding!");
-        for (const optionKey in this.options) {
-            const option = this.options[optionKey as keyof typeof SettingsManager];
-            const e = get(`#${option.id}`);
-            console.log("adding change listener to", e);
-            e.addEventListener("change", (ev) => {
-                option.value = handler(option).getValue(option.id).value as any;
-                console.log("change", ev, "setting value", option.value);
-                this.saveOptions();
-            });
-        }
-        // Bind change events to all inputs with the 'option-input' class
-        // const inputs = document.querySelectorAll(".option-input");
-        // inputs.forEach((input) => {
-        //   // Initialize the state of the options
-        //   const checkbox = input as HTMLInputElement;
-        //   this.options[checkbox.id] = checkbox.checked;
-        //   // Listen for changes on each input
-        //   checkbox.addEventListener("change", () => {
-        //     this.options[checkbox.id] = checkbox.checked;
-        //   });
-        // });
-    }
-
-    private async loadOptions(backToDefault: boolean = false) {
-        // Load options from storage
-        return new Promise((res, rej) => {
-            chrome.storage.sync.get(["settings"], (result) => {
-                if (
-                    !backToDefault &&
-                    result.settings &&
-                    shallowEqual(result.settings, SettingsManager)
-                ) {
-                    console.log("found options in settings", result.settings);
-                    this.options = result.settings;
-                } else {
-                    if (
-                        result.settings &&
-                        !shallowEqual(result.settings, SettingsManager)
-                    ) {
-                        console.log(
-                            "shallow equal didnt work. storage:",
-                            result.settings,
-                            "going with default settings",
-                            SettingsManager
-                        );
-                    }
-                    this.options = SettingsManager;
-
-                }
-                this.getForm().querySelectorAll(':scope > :not(.stay-btn)').forEach(child => {
-                    this.getForm().removeChild(child);
-                });
-                // Update the input elements
-                const elements: Element[] = []
-                for (const key in this.options) {
-                    const option = this.options[key as keyof typeof SettingsManager];
-                    // const e = get(`#${option.id}`);
-                    let handle = handler(option);
-                    const gen = handle.createElement(option.id);
-                    gen.classList.add("custom-gen");
-                    console.log('creating element', key)
-                    elements.push(gen)
-                    // this.getForm().prepend(gen);
-                    // handle.setValue(option.id, option.value as any);
-                }
-                this.getForm().prepend(...elements)
-                for (const key in this.options) {
-                    const option = this.options[key as keyof typeof SettingsManager];
-                    // const e = get(`#${option.id}`);
-                    let handle = handler(option);
-                    handle.setValue(option.id, option.value as any);
-                }
-                res(null);
-            });
-        });
-    }
-
     private saveOptions(): void {
-        // Save the current state of the options to storage
-        chrome.storage.sync.set({settings: this.options}, () => {
-            console.log("Options saved:", this.options);
-            chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+        settingsManager.saveSettings().then(() => {
+            console.log("Settings saved.");
+            // Notify any listeners that settings have changed
+            chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
                 const activeTab = tabs[0];
                 simpleRequestSystem.sendRequestToTab(
                     activeTab.id!,
                     createSimpleRequest({message: "settings-change"})
                 );
             });
-        });
+        }).catch(console.error);
     }
 }
 
-function closePopup() {
-    var daddy = window.self;
-    daddy.opener = window.self;
-    daddy.close();
+function createInputForSetting(id: string, setting: Setting): HTMLElement {
+    // Create different types of input elements based on the setting type
+    // This function needs to be implemented based on the specific requirements
+    // ...
+    console.log('creating input for setting', setting, "with id", id)
+    return handler(setting).createElement(id)
 }
 
-// function handler(setting: Checkbox): Handler;
-// function handler(setting: Dropdown): Handler;
+function setValueForInput(inputElement: HTMLElement, value: Setting): void {
+    // Set the input element's value based on the setting value
+    // This function needs to be implemented based on the specific requirements
+    // ...
+    // console.log(inputElement)
+    // const setting = settingsManager.getSetting(inputElement.id as keyof Settings);
+    // console.log('got setting to set value for', setting)
+    handler(value).setValue(inputElement.id, value);
+}
+
+function getValueFromInput(inputElement: HTMLElement): any {
+    // Get the input element's value and return it
+    // This function needs to be implemented based on the specific requirements
+    // ...
+    const setting = settingsManager.getSetting(inputElement.id as keyof Settings);
+    console.log('got setting')
+    return handler(setting).getValue(inputElement.id);
+}
+
+// Handler function remains as in your original code
 function handler(setting: Setting): Handler {
+    console.log('getting handler', setting)
+
+    function getForm() {
+        return get<HTMLFormElement>("#options-form");
+    }
+
     switch (setting.type) {
 
         case "checkbox":
@@ -187,10 +300,11 @@ function handler(setting: Setting): Handler {
                     label.textContent = setting.name;
                     div.appendChild(input);
                     div.appendChild(label);
-                    return div;
+                    getForm().appendChild(div);
+                    return input;
                 },
                 getValue(id) {
-                    const e = get(`#${id}`);
+                    const e = get<HTMLInputElement>(`#${id}`);
                     return {
                         id: id,
                         name: setting.name,
@@ -199,10 +313,10 @@ function handler(setting: Setting): Handler {
                     };
                 },
                 setValue(id, value) {
-                    get(`#${id}`).checked = value as boolean;
+                    get<HTMLInputElement>(`#${id}`).checked = value as boolean;
                 },
             };
-        case "positionAdj":
+        case "positionAdjust":
             return {
                 createElement(id) {
                     const div = document.createElement("div");
@@ -224,10 +338,12 @@ function handler(setting: Setting): Handler {
                         // Dispatch it on the button itself
                         this.dispatchEvent(event);
 
-                        setTimeout(closePopup, 1000);
+                        setTimeout(Popup.close, 100);
                     });
                     div.appendChild(button);
-                    return div;
+                    getForm().appendChild(div);
+
+                    return button;
                 },
                 getValue(id) {
                     const e = get(`#${id}`);
@@ -242,14 +358,14 @@ function handler(setting: Setting): Handler {
                         },
                     };
                 },
+                // Example adjustments for `positionAdjust`
                 setValue(id, value) {
-                    const cVal = value as PositionAdjustValue;
                     const e = get<HTMLButtonElement>(`#${id}`);
-
-                    e.setAttribute("pos", JSON.stringify(cVal.pos))
-                    e.setAttribute("checked", cVal.isMoving + "");
-
+                    // Assuming `value` contains the `x` and `y` properties
+                    e.setAttribute("pos", JSON.stringify({x: value.x, y: value.y}));
+                    e.setAttribute("checked", value.isMoving + "");
                 },
+
             };
         case "dropdown":
             return {
@@ -263,7 +379,7 @@ function handler(setting: Setting): Handler {
                     select.id = id;
                     select.className = "form-control custom-select mb-3"; // Use Bootstrap's form control and custom-select classes
                     // Add options to the select element
-                    setting.value.choices.forEach((choice) => {
+                    setting.choices.forEach((choice) => {
                         const option = document.createElement("option");
                         option.value = choice;
                         option.textContent = choice;
@@ -271,40 +387,60 @@ function handler(setting: Setting): Handler {
                     });
                     div.appendChild(label);
                     div.appendChild(select);
-                    return div;
+                    getForm().appendChild(div);
+                    return select;
                 },
                 getValue(id) {
                     const select = get<HTMLSelectElement>(`#${id}`);
+                    const choices = []
+                    let i = 0;
+                    let selected = 0;
+                    for (const op of select.options) {
+                        choices.push(op.value)
+                        if (i === select.selectedIndex) {
+                            selected = i;
+                        }
+                        i++;
+                    }
+                    console.log('getting value for', id, 'values', {choices, selected: choices[selected]})
                     return {
                         id: id,
                         name: setting.name,
                         type: setting.type,
-                        value: {
-                            choices: setting.value.choices,
-                            selected: select.selectedIndex,
-                        },
+                        choices,
+                        value: choices[selected]
                     };
                 },
+                // setValue(id, value) {
+                //     console.log('setting value for id:', id, 'value is:', value)
+                //     const select = get<HTMLSelectElement>(`#${id}`);
+                //     select.options.length = 0; // Clear existing options
+                //     // const conv = settingsManager.getSetting(id as any);
+                //     // console.log({conv})
+                //     value.choices.forEach((choice: string, index: number) => {
+                //         const optionElement = new Option(choice, choice);
+                //         select.add(optionElement);
+                //         if (choice === value) {
+                //             select.selectedIndex = index;
+                //         }
+                //     });
+                // },
                 setValue(id, value) {
                     const select = get<HTMLSelectElement>(`#${id}`);
-                    select.options.length = 0; // Clear existing options
-                    const conv = value as DropdownChoices;
-                    conv.choices.forEach((choice, index) => {
-                        const optionElement = new Option(choice, choice);
-                        select.add(optionElement);
-                        if (index === conv.selected) {
-                            select.selectedIndex = index;
-                        }
-                    });
+                    select.value = value; // This assumes `value` is one of the choices
                 },
+
             };
     }
     // switch(setting)
 }
 
+
+// Handler interface remains as in your original code
 interface Handler {
-    getValue: (id: string) => Setting;
-    setValue: (id: string, value: Setting["value"]) => void;
-    createElement: (id: string) => Element;
-    bind?: () => void;
+    getValue: (id: string) => any;
+    setValue: (id: string, value: any) => void;
+    createElement: (id: string) => HTMLElement;
 }
+
+// Continue with the rest of the implementation...

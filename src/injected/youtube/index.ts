@@ -18,10 +18,10 @@
 import {handleRequestInTab} from "../../messaging/framework/handle_request";
 import {transcribe} from "./transcriber";
 import {captionsSetup, createOverlay,} from "./overlay";
-import {updateSettings} from "../../util/settings";
 import {log} from "./logger";
 import "./styles.css"
 import convert from 'convert'
+import {settingsManager} from "../../util/settings";
 // gotta import it so webpack keeps it so it can be dynamically imported later
 console.log("convert says:", convert(69, "kg").to("best", "metric").toString(0))
 /**
@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.data.message == "popup-popped") {
         // run();
     } else if (request.data.message === "settings-change") {
-        updateSettings();
+        settingsManager.loadSettings();
 
     }
     return handleRequestInTab(request, sender, sendResponse);

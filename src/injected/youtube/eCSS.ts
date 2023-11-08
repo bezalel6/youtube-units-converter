@@ -31,7 +31,7 @@ export function setCSS({settings}: cssProps): CSS {
         .s("alignItems", "center")
         .s(
             "color",
-            settings.textColor.value.choices[settings.textColor.value.selected]
+            settings.textColor.value
         ).s("width", CONSTS.popupWidth)
         .s("textWrap", "pretty")
         .s("zIndex", "100")
@@ -43,7 +43,7 @@ export function setCSS({settings}: cssProps): CSS {
     css += new CSSBuilder(`#${CONSTS.overlayText}`)
         .s(
             "fontSize",
-            settings.textSize.value.choices[settings.textSize.value.selected],
+            settings.textSize.value,
             true
         ).s("direction", "ltr")
         .s("userSelect", "none")

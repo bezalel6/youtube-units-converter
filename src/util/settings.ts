@@ -1,125 +1,132 @@
-import {recalcCSS} from "../injected/youtube/overlay";
-
-export interface BaseSetting<T> {
-    id: string;
+// Types for individual settings
+export interface CheckboxSetting {
+    type: 'checkbox';
+    value: boolean;
     name: string;
-    value: T;
 }
 
-export interface Checkbox extends BaseSetting<boolean> {
-    type: "checkbox";
-}
-
-export interface DropdownChoices {
+export interface DropdownSetting {
+    type: 'dropdown';
+    value: string;
     choices: string[];
-    selected: number;
+    name: string;
+
 }
 
-export interface Dropdown extends BaseSetting<DropdownChoices> {
-    type: "dropdown";
+export interface PositionAdjustSetting {
+    type: 'positionAdjust';
+    value: { isMoving: boolean; x: number; y: number };
+    name: string;
+
 }
 
-export interface PositionAdjustValue {
-    isMoving: boolean,
-    pos: {
-        x: number,
-        y: number
-    }
+// Union type for the setting types
+export type Setting = CheckboxSetting | DropdownSetting | PositionAdjustSetting;
+
+// Define the structure for all possible settings
+export interface Settings {
+    textSize: DropdownSetting;
+    unitSelection: DropdownSetting;
+    textColor: DropdownSetting;
+    enabled: CheckboxSetting;
+    testing: CheckboxSetting;
+    adjustingPosition: PositionAdjustSetting;
 }
 
-export interface PositionAdjust extends BaseSetting<PositionAdjustValue> {
-    type: "positionAdj"
-}
-
-export type Setting = Checkbox | Dropdown | PositionAdjust;
-
-
-export let SettingsManager = {
-
+// Default values for settings
+const defaultSettings: Settings = {
     textSize: {
-        type: "dropdown" as const,
-        value: {
-            choices: ["2.5rem", "2rem", "1.5rem", "1rem"],
-            selected: 0,
-        },
-        id: "textSize",
-        name: "Text Size",
+        type: 'dropdown',
+        value: '2rem',
+        choices: ['2.5rem', '2rem', '1.5rem', '1rem'],
+        name: "Text Size"
     },
     unitSelection: {
-        type: "dropdown" as const,
-        value: {
-            choices: ["metric", "imperial"],
-            selected: 0,
-        },
-        id: "unitSelection",
-        name: "Unit",
+        type: 'dropdown',
+        value: 'metric',
+        choices: ['metric', 'imperial'],
+        name: "Unit"
     },
     textColor: {
-        type: "dropdown" as const,
-        value: {
-            choices: ["white", "blue", "aqua"],
-            selected: 0,
-        },
-        id: "textClr",
-        name: "Text Color",
+        type: 'dropdown',
+        value: 'white',
+        choices: ['white', 'blue', 'aqua'],
+        name: "Text Color"
     },
     enabled: {
-        type: "checkbox" as const,
+        type: 'checkbox',
         value: true,
-        id: "enabled",
-        name: "Enable converter",
+        name: "Extension Enabled"
     },
     testing: {
-        type: "checkbox" as const,
+        type: 'checkbox',
         value: false,
-        id: "testing",
-        name: "Test",
+        name: "Testing"
     },
     adjustingPosition: {
-        type: "positionAdj" as const,
-        value: {
-            isMoving: false,
-            pos: {x: -1, y: -1},
-        },
-        id: "adjust-pos",
+        type: 'positionAdjust',
+        value: {isMoving: false, x: 0, y: 0},
         name: "Move"
-    }
+    },
 };
-export type Settings = typeof SettingsManager;
 
-export async function saveSettings(settings: Settings) {
-    return new Promise<Settings>((resolve, reject) => {
+// SettingsManager class
+class SettingsManager {
+    private settings: Settings;
 
-        chrome.storage.sync.set({settings}, () => {
-            console.log("Settings saved:", settings);
-            resolve(settings)
+    constructor() {
+        this.settings = defaultSettings;
+    }
+
+    public getAllSettings(): Settings {
+        return this.settings;
+    }
+
+    public async saveSettings(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            chrome.storage.sync.set({settings: this.settings}, () => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                    console.log("Settings have been saved.");
+                    resolve();
+                }
+            });
         });
-    })
-}
+    }
 
-export async function getSettings(): Promise<Settings> {
-    return new Promise<Settings>((res, rej) => {
-        chrome.storage.sync.get(["settings"], (result) => {
-            if (result.settings) {
-                const newSettings = result.settings;
-                SettingsManager = newSettings;
-
-            }
-            res(SettingsManager)
+    public async loadSettings(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            chrome.storage.sync.get(['settings'], (result) => {
+                if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                    this.settings = result.settings || defaultSettings;
+                    console.log("Settings have been loaded.");
+                    resolve();
+                }
+            });
         });
-    })
-}
+    }
 
-export function updateSettings() {
-    chrome.storage.sync.get(["settings"], (result) => {
-        const newSettings = result.settings;
-        if (newSettings) {
-            SettingsManager = newSettings;
+    public getSetting<K extends keyof Settings>(key: K): Settings[K] {
+        return this.settings[key];
+    }
 
-            console.log("updated settings", newSettings);
+    public updateSetting<K extends keyof Settings>(key: K, newValue: Settings[K]['value']): void {
+        const setting = this.settings[key];
+        if (setting && 'value' in setting) {
+            console.log('updating settings', {key, newValue, oldValue: setting.value})
+            setting.value = newValue;
+            this.saveSettings().catch((error) => {
+                console.error(`Failed to save the updated setting for ${key}:`, error);
+            });
         } else {
-            console.log("no saved settings. using default values")
+            console.error(`Setting ${key} does not exist.`);
         }
-        recalcCSS();
-    });
+    }
 }
+
+// Export a singleton instance of the SettingsManager
+const settingsManager = new SettingsManager();
+export {settingsManager};
