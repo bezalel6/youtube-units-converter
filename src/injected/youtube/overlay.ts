@@ -1,15 +1,25 @@
-import {getSettings, SettingsManager, updateSettings} from "../../util/settings";
+import {getSettings, saveSettings, SettingsManager, updateSettings} from "../../util/settings";
 import {Captions, Convertable} from "./captions";
 import {CONSTS, setCSS} from "./eCSS";
 import {addDragListener} from "../../util/MouseDragListener";
 
+let overlayTextStr: string | null = null;
 
 export function setText(str: string) {
     // console.log("text set to", str);
+    const e = document.querySelector(`#${CONSTS.overlayText}`) as HTMLDivElement;
 
-    (
-        document.querySelector(`#${CONSTS.overlayText}`) as HTMLDivElement
-    ).innerText = str;
+    if (overlayTextStr !== str) {
+        e.innerText = str;
+        overlayTextStr = str;
+    }
+}
+
+export function moveSaveBtnClick() {
+    SettingsManager.adjustingPosition.value.isMoving = false;
+
+    saveSettings(SettingsManager).then(recalcCSS);
+
 }
 
 export function isOverlayAdded() {
@@ -29,9 +39,11 @@ export function createOverlay() {
         const overlay = document.createElement("div");
         overlay.id = `${CONSTS.overlay}`;
 
-        overlay.innerHTML = `<h1 id="${CONSTS.overlayText}"></h1>`;
+        overlay.innerHTML = `<h1 id="${CONSTS.overlayText}"></h1><button id="${CONSTS.movementSaveBtn}">Save</button>`;
         // Append overlay to video element
         videoElement.appendChild(overlay);
+        const btn = document.querySelector(`#${CONSTS.movementSaveBtn}`) as HTMLButtonElement
+        btn.onclick = moveSaveBtnClick;
         updateSettings();
         addDragListener(overlay, videoElement, {
             onDrag: () => {
@@ -87,9 +99,20 @@ function onTimeUpdate() {
     const videoElement = document.querySelector("video")!;
 
     async function asyncF() {
-
+        let callbacks = [...scheduledCallbacks]
+        if (SettingsManager.testing.value) {
+            callbacks.push({
+                convertable: {
+                    unit: "cm",
+                    amount: 69
+                },
+                time: videoElement.currentTime,
+                duration: 20,
+                text: "yeah so heres some text"
+            });
+        }
         let str = "";
-        for (const scheduled of scheduledCallbacks) {
+        for (const scheduled of callbacks) {
             const diff = videoElement.currentTime - scheduled.time;
             if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
                 // const txt = convertUnit(scheduled.convertable, await getSettings());
@@ -104,13 +127,14 @@ function onTimeUpdate() {
             }
         }
         // console.log("done calling callbacks. str is", str)
-        if (!str.length) {
-            if (SettingsManager.testing.value) {
-                setText("testing testing 123");
-            } else {
-                setText("");
-            }
-        } else setText(str);
+        // if (!str.length) {
+        //     if (SettingsManager.testing.value) {
+        //         setText("testing testing 123");
+        //     } else {
+        //         setText("");
+        //     }
+        // } else
+        setText(str);
     }
 
     asyncF()

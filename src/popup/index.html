@@ -2,18 +2,31 @@
 <html>
 
 <head>
+    <!-- Include the Font Awesome CDN in your head tag -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
 <div class="container">
-    <h1>Unit Converter</h1>
+    <div class="container"><h1>Unit Converter</h1>
+        <button class="btn btn-secondary" id="delete-storage">
+            <i class="bi bi-trash"></i>
+            trash
+        </button>
+        >
+    </div>
     <form id="options-form">
 
         <!--      <button type="submit" class="btn btn-primary">Save</button>-->
-        <button class="btn btn-primary" type="reset">Reset to default</button>
+        <button class="stay-btn btn btn-primary mb-2 w-100 last" type="reset">Reset to default</button>
     </form>
 </div>
+
+<!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>-->
+<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>-->
 </body>
 
 </html>

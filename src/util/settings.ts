@@ -35,18 +35,7 @@ export type Setting = Checkbox | Dropdown | PositionAdjust;
 
 
 export let SettingsManager = {
-    enabled: {
-        type: "checkbox" as const,
-        value: true,
-        id: "enabled",
-        name: "Enable converter",
-    },
-    testing: {
-        type: "checkbox" as const,
-        value: false,
-        id: "testing",
-        name: "Test",
-    },
+
     textSize: {
         type: "dropdown" as const,
         value: {
@@ -74,6 +63,18 @@ export let SettingsManager = {
         id: "textClr",
         name: "Text Color",
     },
+    enabled: {
+        type: "checkbox" as const,
+        value: true,
+        id: "enabled",
+        name: "Enable converter",
+    },
+    testing: {
+        type: "checkbox" as const,
+        value: false,
+        id: "testing",
+        name: "Test",
+    },
     adjustingPosition: {
         type: "positionAdj" as const,
         value: {
@@ -85,6 +86,16 @@ export let SettingsManager = {
     }
 };
 export type Settings = typeof SettingsManager;
+
+export async function saveSettings(settings: Settings) {
+    return new Promise<Settings>((resolve, reject) => {
+
+        chrome.storage.sync.set({settings}, () => {
+            console.log("Settings saved:", settings);
+            resolve(settings)
+        });
+    })
+}
 
 export async function getSettings(): Promise<Settings> {
     return new Promise<Settings>((res, rej) => {

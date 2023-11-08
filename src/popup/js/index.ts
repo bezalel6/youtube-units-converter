@@ -31,14 +31,20 @@ import {shallowEqual} from "../../util/utils";
 function get<T = HTMLInputElement>(selector: string): T {
     const e = document.querySelector(selector);
     if (!e) {
-        console.error("COULDNT FIND SELECTOR: ", selector);
-        throw "SHIT";
+        console.error("COULD NOT FIND SELECTOR: ", selector);
+        throw new Error("Selector not found");
     }
     return e as unknown as T;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     new Popup();
+
+    get("#delete-storage").onclick = () => {
+        chrome.storage.sync.remove(["settings"]).then(() => {
+            console.log("deleted storage")
+        });
+    }
 });
 
 class Popup {
@@ -111,19 +117,27 @@ class Popup {
                     }
                     this.options = SettingsManager;
                 }
-                this.getForm()
-                    .querySelectorAll(".custom-gen")
-                    .forEach((e) => {
-                        e.remove();
-                    });
+                this.getForm().querySelectorAll(':scope > :not(.stay-btn)').forEach(child => {
+                    this.getForm().removeChild(child);
+                });
                 // Update the input elements
+                const elements: Element[] = []
                 for (const key in this.options) {
                     const option = this.options[key as keyof typeof SettingsManager];
                     // const e = get(`#${option.id}`);
                     let handle = handler(option);
                     const gen = handle.createElement(option.id);
                     gen.classList.add("custom-gen");
-                    this.getForm().appendChild(gen);
+                    console.log('creating element', key)
+                    elements.push(gen)
+                    // this.getForm().prepend(gen);
+                    // handle.setValue(option.id, option.value as any);
+                }
+                this.getForm().prepend(...elements)
+                for (const key in this.options) {
+                    const option = this.options[key as keyof typeof SettingsManager];
+                    // const e = get(`#${option.id}`);
+                    let handle = handler(option);
                     handle.setValue(option.id, option.value as any);
                 }
                 res(null);
@@ -146,6 +160,12 @@ class Popup {
     }
 }
 
+function closePopup() {
+    var daddy = window.self;
+    daddy.opener = window.self;
+    daddy.close();
+}
+
 // function handler(setting: Checkbox): Handler;
 // function handler(setting: Dropdown): Handler;
 function handler(setting: Setting): Handler {
@@ -154,38 +174,48 @@ function handler(setting: Setting): Handler {
             return {
                 createElement(id) {
                     const div = document.createElement("div");
-                    div.className = "custom-control custom-switch";
-                    const e = document.createElement("input");
-                    e.type = "checkbox";
-                    e.className = "custom-control-input";
-                    e.id = id;
-                    const lbl = document.createElement("label");
-                    lbl.className = "custom-control-label";
-                    lbl.htmlFor = id;
-                    lbl.textContent = setting.name;
 
-                    div.appendChild(e);
-                    div.appendChild(lbl);
+                    // div.className = "btn-group mb-2"; // Bootstrap button group class with margin-bottom
+                    const button = document.createElement("button");
+                    button.className = "btn btn-secondary mb-2 w-100"; // Bootstrap button class
+                    button.id = id;
+                    button.textContent = setting.name;
+                    button.addEventListener('click', function () {
+                        button.setAttribute("checked", (!(button.getAttribute("checked") === "true")) + "")
+                        // Create a new 'change' event for the button
+                        const event = new Event('change', {
+                            'bubbles': true,
+                            'cancelable': true
+                        });
+
+
+                        // Dispatch it on the button itself
+                        this.dispatchEvent(event);
+
+                        setTimeout(closePopup, 1000);
+                    });
+                    div.appendChild(button);
                     return div;
                 },
                 getValue(id) {
                     const e = get(`#${id}`);
+
                     return {
                         id: id,
                         name: setting.name,
                         type: setting.type,
                         value: {
-                            isMoving: e.checked,
+                            isMoving: e.getAttribute("checked") === "true",
                             pos: JSON.parse(e.getAttribute("pos")!)
                         },
                     };
                 },
                 setValue(id, value) {
                     const cVal = value as PositionAdjustValue;
-                    const e = get(`#${id}`);
+                    const e = get<HTMLButtonElement>(`#${id}`);
 
                     e.setAttribute("pos", JSON.stringify(cVal.pos))
-                    e.checked = cVal.isMoving;
+                    e.setAttribute("checked", cVal.isMoving + "");
 
                 },
             };
@@ -193,18 +223,17 @@ function handler(setting: Setting): Handler {
             return {
                 createElement(id) {
                     const div = document.createElement("div");
-                    div.className = "custom-control custom-switch";
-                    const e = document.createElement("input");
-                    e.type = "checkbox";
-                    e.className = "custom-control-input";
-                    e.id = id;
-                    const lbl = document.createElement("label");
-                    lbl.className = "custom-control-label";
-                    lbl.htmlFor = id;
-                    lbl.textContent = setting.name;
-
-                    div.appendChild(e);
-                    div.appendChild(lbl);
+                    div.className = "custom-control custom-switch mb-2"; // Bootstrap switch class with margin-bottom
+                    const input = document.createElement("input");
+                    input.type = "checkbox";
+                    input.className = "custom-control-input"; // Bootstrap input class
+                    input.id = id;
+                    const label = document.createElement("label");
+                    label.className = "custom-control-label"; // Bootstrap label class
+                    label.htmlFor = id;
+                    label.textContent = setting.name;
+                    div.appendChild(input);
+                    div.appendChild(label);
                     return div;
                 },
                 getValue(id) {
@@ -223,14 +252,24 @@ function handler(setting: Setting): Handler {
         case "dropdown":
             return {
                 createElement(id) {
+                    const div = document.createElement("div");
+                    div.className = "form-group"; // Use Bootstrap's form group class
+                    const label = document.createElement("label");
+                    label.htmlFor = id;
+                    label.textContent = setting.name;
                     const select = document.createElement("select");
                     select.id = id;
-                    setting.value.choices.forEach((choice, index) => {
-                        const optionElement = new Option(choice, choice);
-                        optionElement.selected = index === setting.value.selected;
-                        select.add(optionElement);
+                    select.className = "form-control custom-select mb-3"; // Use Bootstrap's form control and custom-select classes
+                    // Add options to the select element
+                    setting.value.choices.forEach((choice) => {
+                        const option = document.createElement("option");
+                        option.value = choice;
+                        option.textContent = choice;
+                        select.appendChild(option);
                     });
-                    return select;
+                    div.appendChild(label);
+                    div.appendChild(select);
+                    return div;
                 },
                 getValue(id) {
                     const select = get<HTMLSelectElement>(`#${id}`);
@@ -265,4 +304,5 @@ interface Handler {
     getValue: (id: string) => Setting;
     setValue: (id: string, value: Setting["value"]) => void;
     createElement: (id: string) => Element;
+    bind?: () => void;
 }

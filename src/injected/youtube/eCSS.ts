@@ -25,15 +25,20 @@ export function setCSS({settings}: cssProps): CSS {
         .s("position", "absolute")
         .s("top", "0")
         .s("left", "0")
+        .s("direction", "ltr")
         .s("webkitTextStroke", "3px black")
         .s("display", settings.enabled.value ? "flex" : "none")
         .s("alignItems", "center")
         .s(
             "color",
             settings.textColor.value.choices[settings.textColor.value.selected]
-        )
+        ).s("width", CONSTS.popupWidth)
+        .s("textWrap", "pretty")
         .s("zIndex", "100")
         .build();
+    const moveSave = new CSSBuilder(`#${CONSTS.movementSaveBtn}`)
+        .s("display", settings.adjustingPosition.value.isMoving ? "block" : "none")
+    css += moveSave.build();
     css += overlay;
     css += new CSSBuilder(`#${CONSTS.overlayText}`)
         .s(
@@ -44,6 +49,7 @@ export function setCSS({settings}: cssProps): CSS {
         .s("userSelect", "none")
         .s("textShadow", "12px -9px 3px rgba(0, 0, 0, 0.5)")
         .s("textAlign", "center")
+        .s("width", "100%")
         .s("border", settings.adjustingPosition.value.isMoving ? "3px dashed red" : "none")
         .build();
     //   console.log("css", css);
@@ -55,6 +61,8 @@ export enum CONSTS {
     overlay = "custom-overlay",
     overlayText = "overlay-text",
     customCSS = "custom-css",
+    movementSaveBtn = "move-save",
+    popupWidth = "350px",
 }
 
 type CSSProperties = {
