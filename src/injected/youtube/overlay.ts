@@ -21,9 +21,10 @@ export function createOverlay() {
     // Get the video element
 
     const videoElement = document.querySelector(".html5-video-player") as HTMLElement;
-    if (isOverlayAdded()) {
-        console.error("trying to create overlay when one exists");
-    } else if (videoElement) {
+    // if (isOverlayAdded()) {
+    //     console.error('trying to create overlay when one exists');
+    if (videoElement) {
+        document.querySelector(`#${CONSTS.overlay}`)?.remove();
         // Create overlay element
         const overlay = document.createElement("div");
         overlay.id = `${CONSTS.overlay}`;
@@ -93,6 +94,7 @@ function onTimeUpdate() {
             if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
                 // const txt = convertUnit(scheduled.convertable, await getSettings());
                 const settings = (await getSettings());
+                // if(scheduled.convertable.unit)
                 const txt = await makeConvertable(scheduled.convertable, settings.unitSelection.value.choices[settings.unitSelection.value.selected] === "metric");
                 // const txt = "fuck its the settings manager"
                 console.log("running ", txt);

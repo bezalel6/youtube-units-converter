@@ -17,11 +17,13 @@
 
 import {handleRequestInTab} from "../../messaging/framework/handle_request";
 import {transcribe} from "./transcriber";
-import {captionsSetup, createOverlay, isOverlayAdded, recalcCSS,} from "./overlay";
+import {captionsSetup, createOverlay,} from "./overlay";
 import {updateSettings} from "../../util/settings";
 import {log} from "./logger";
 import "./styles.css"
-
+import convert from 'convert'
+// gotta import it so webpack keeps it so it can be dynamically imported later
+console.log("convert says:", convert(69, "kg").to("best", "metric").toString(0))
 /**
  * handle requests sent via the message system
  */
@@ -31,33 +33,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // run();
     } else if (request.data.message === "settings-change") {
         updateSettings();
-        recalcCSS();
+
     }
     return handleRequestInTab(request, sender, sendResponse);
 });
 
+let currentVideoID: string | null;
+
 function run() {
     console.log("running...");
     const videoId = getVideoId();
-    if (videoId) {
-        if (isOverlayAdded()) {
-            console.log("overlay exists. not recreating");
-        } else {
-            transcribe(videoId)
-                .then((captions) => {
-                    console.log(captions);
-                    createOverlay();
-                    captionsSetup(captions);
-                })
-                .catch(e => {
-                    // if(e instanceof  NotConnectedToServerErr){
-                    log("not connected to server", "error")
-                    // }
 
-                });
-        }
+    if (videoId && videoId != currentVideoID) {
+        currentVideoID = videoId;
+        // if (isOverlayAdded()) {
+        //     console.log("overlay exists. not recreating");
+        // } else {
+        transcribe(videoId)
+            .then((captions) => {
+                console.log(captions);
+                createOverlay();
+                captionsSetup(captions);
+            })
+            .catch(e => {
+                // if(e instanceof  NotConnectedToServerErr){
+                log("not connected to server", "error")
+                // }
+
+            });
+        // }
     } else {
-        console.error("couldnt get video id");
+        if (!videoId)
+            console.error("couldnt get video id");
+        else if (videoId === currentVideoID) {
+            console.log("already running on this id")
+        }
     }
 }
 
