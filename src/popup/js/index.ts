@@ -17,7 +17,7 @@
 import "../scss/styles.scss";
 
 import {createSimpleRequest, simpleRequestSystem,} from "../../messaging/request_systems/simple_request";
-import {DropdownChoices, Setting, SettingsManager,} from "../../util/settings";
+import {DropdownChoices, PositionAdjustValue, Setting, SettingsManager,} from "../../util/settings";
 import {shallowEqual} from "../../util/utils";
 
 // chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
@@ -150,6 +150,45 @@ class Popup {
 // function handler(setting: Dropdown): Handler;
 function handler(setting: Setting): Handler {
     switch (setting.type) {
+        case "positionAdj":
+            return {
+                createElement(id) {
+                    const div = document.createElement("div");
+                    div.className = "custom-control custom-switch";
+                    const e = document.createElement("input");
+                    e.type = "checkbox";
+                    e.className = "custom-control-input";
+                    e.id = id;
+                    const lbl = document.createElement("label");
+                    lbl.className = "custom-control-label";
+                    lbl.htmlFor = id;
+                    lbl.textContent = setting.name;
+
+                    div.appendChild(e);
+                    div.appendChild(lbl);
+                    return div;
+                },
+                getValue(id) {
+                    const e = get(`#${id}`);
+                    return {
+                        id: id,
+                        name: setting.name,
+                        type: setting.type,
+                        value: {
+                            isMoving: e.checked,
+                            pos: JSON.parse(e.getAttribute("pos")!)
+                        },
+                    };
+                },
+                setValue(id, value) {
+                    const cVal = value as PositionAdjustValue;
+                    const e = get(`#${id}`);
+
+                    e.setAttribute("pos", JSON.stringify(cVal.pos))
+                    e.checked = cVal.isMoving;
+
+                },
+            };
         case "checkbox":
             return {
                 createElement(id) {

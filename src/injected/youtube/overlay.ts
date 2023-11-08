@@ -32,7 +32,12 @@ export function createOverlay() {
         // Append overlay to video element
         videoElement.appendChild(overlay);
         updateSettings();
-        addDragListener(overlay, videoElement, {onDrag: console.log})
+        addDragListener(overlay, videoElement, {
+            onDrag: () => {
+            }, isDragEnabled: () => {
+                return SettingsManager.adjustingPosition.value.isMoving
+            }
+        })
         return true;
     }
     return false;

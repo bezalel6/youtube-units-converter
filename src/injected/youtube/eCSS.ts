@@ -44,7 +44,7 @@ export function setCSS({settings}: cssProps): CSS {
         .s("userSelect", "none")
         .s("textShadow", "12px -9px 3px rgba(0, 0, 0, 0.5)")
         .s("textAlign", "center")
-        .s("border",settings.)
+        .s("border", settings.adjustingPosition.value.isMoving ? "3px dashed red" : "none")
         .build();
     //   console.log("css", css);
     injectCSS(css);

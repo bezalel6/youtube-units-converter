@@ -19,7 +19,20 @@ export interface Dropdown extends BaseSetting<DropdownChoices> {
     type: "dropdown";
 }
 
-export type Setting = Checkbox | Dropdown;
+export interface PositionAdjustValue {
+    isMoving: boolean,
+    pos: {
+        x: number,
+        y: number
+    }
+}
+
+export interface PositionAdjust extends BaseSetting<PositionAdjustValue> {
+    type: "positionAdj"
+}
+
+export type Setting = Checkbox | Dropdown | PositionAdjust;
+
 
 export let SettingsManager = {
     enabled: {
@@ -61,6 +74,15 @@ export let SettingsManager = {
         id: "textClr",
         name: "Text Color",
     },
+    adjustingPosition: {
+        type: "positionAdj" as const,
+        value: {
+            isMoving: false,
+            pos: {x: -1, y: -1},
+        },
+        id: "adjust-pos",
+        name: "Move"
+    }
 };
 export type Settings = typeof SettingsManager;
 
