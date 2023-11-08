@@ -190,7 +190,7 @@ class Popup {
     private options: ReturnType<typeof settingsManager['getAllSettings']>;
 
     constructor() {
-        this.options = settingsManager.getAllSettings();
+
     }
 
     public static close() {
@@ -200,32 +200,51 @@ class Popup {
     }
 
     async loadOptions(): Promise<void> {
-        await settingsManager.loadSettings();
+        this.options = await settingsManager.loadSettings();
         this.bindInputs();
+
     }
 
     bindInputs(): void {
         const form = this.getForm();
-        form.innerHTML = ''; // Reset the form UI
-
-        Object.keys(this.options).forEach((key) => {
+        form.innerHTML = ``; // Reset the form UI
+        // form.querySelectorAll('form > :not(.stay-btn)').forEach(child => {
+        //     console.log("removing", child)
+        //     child.remove();
+        // })
+        const settings = settingsManager.getAllSettings();
+        Object.keys(settings).forEach((key) => {
             // Assert 'key' is actually a keyof Settings
             const optionKey = key as keyof Settings;
             // const option = this.options[optionKey];
-            const option = this.options[optionKey];
+            const option = settings[optionKey];
             const inputElement = createInputForSetting(optionKey, option);
             // form.appendChild(inputElement);
-            console.log('before setting value for input', {optionKey, option, inputElement})
+            // console.log('before setting value for input', {optionKey, option, inputElement})
             // Now TypeScript knows that 'inputElement' is associated with a key of 'Settings'
             setValueForInput(inputElement, option);
-            console.log('after setting value for input', {optionKey, option})
+            // console.log('after setting value for input', {optionKey, option})
 
-            inputElement.addEventListener('change', () => {
-                const newValue = getValueFromInput(inputElement);
-                // Again, assert that 'optionKey' is a keyof Settings
-                settingsManager.updateSetting(optionKey, newValue);
-            });
+            // inputElement.addEventListener('change', () => {
+            //
+            //     const newValue = getValueFromInput(inputElement);
+            //     console.log("change!!!")
+            //     // Again, assert that 'optionKey' is a keyof Settings
+            //     settingsManager.updateSetting(optionKey, newValue);
+            // });
         });
+
+        form.innerHTML += `<button class="stay-btn btn btn-primary mb-2 w-100 last" type="reset">Reset to default</button>`;
+        form.addEventListener("reset", (e) => {
+            e.preventDefault();
+            this.loadOptions();
+        })
+        form.querySelectorAll(".changing").forEach(c => {
+            c.addEventListener("change", (e) => {
+                const val = getValueFromInput(e.target as HTMLElement)
+                settingsManager.updateSetting((e.target as HTMLElement).id as any, val);
+            })
+        })
 
     }
 
@@ -279,6 +298,10 @@ function getValueFromInput(inputElement: HTMLElement): any {
 function handler(setting: Setting): Handler {
     console.log('getting handler', setting)
 
+    function addElement(e: Element) {
+        getForm().append(e);
+    }
+
     function getForm() {
         return get<HTMLFormElement>("#options-form");
     }
@@ -292,7 +315,7 @@ function handler(setting: Setting): Handler {
                     div.className = "custom-control custom-switch mb-2"; // Bootstrap switch class with margin-bottom
                     const input = document.createElement("input");
                     input.type = "checkbox";
-                    input.className = "custom-control-input"; // Bootstrap input class
+                    input.className = "changing custom-control-input"; // Bootstrap input class
                     input.id = id;
                     const label = document.createElement("label");
                     label.className = "custom-control-label"; // Bootstrap label class
@@ -300,7 +323,7 @@ function handler(setting: Setting): Handler {
                     label.textContent = setting.name;
                     div.appendChild(input);
                     div.appendChild(label);
-                    getForm().appendChild(div);
+                    addElement(div);
                     return input;
                 },
                 getValue(id) {
@@ -323,7 +346,7 @@ function handler(setting: Setting): Handler {
 
                     // div.className = "btn-group mb-2"; // Bootstrap button group class with margin-bottom
                     const button = document.createElement("button");
-                    button.className = "btn btn-secondary mb-2 w-100"; // Bootstrap button class
+                    button.className = "changing btn btn-secondary mb-2 w-100"; // Bootstrap button class
                     button.id = id;
                     button.textContent = setting.name;
                     button.addEventListener('click', function () {
@@ -341,7 +364,7 @@ function handler(setting: Setting): Handler {
                         setTimeout(Popup.close, 100);
                     });
                     div.appendChild(button);
-                    getForm().appendChild(div);
+                    addElement(div);
 
                     return button;
                 },
@@ -377,7 +400,7 @@ function handler(setting: Setting): Handler {
                     label.textContent = setting.name;
                     const select = document.createElement("select");
                     select.id = id;
-                    select.className = "form-control custom-select mb-3"; // Use Bootstrap's form control and custom-select classes
+                    select.className = "changing form-control custom-select mb-3"; // Use Bootstrap's form control and custom-select classes
                     // Add options to the select element
                     setting.choices.forEach((choice) => {
                         const option = document.createElement("option");
@@ -387,7 +410,7 @@ function handler(setting: Setting): Handler {
                     });
                     div.appendChild(label);
                     div.appendChild(select);
-                    getForm().appendChild(div);
+                    addElement(div);
                     return select;
                 },
                 getValue(id) {
@@ -426,8 +449,9 @@ function handler(setting: Setting): Handler {
                 //     });
                 // },
                 setValue(id, value) {
+                    console.log("setting dropdown value for", id, "value is", value.value)
                     const select = get<HTMLSelectElement>(`#${id}`);
-                    select.value = value; // This assumes `value` is one of the choices
+                    select.value = value.value; // This assumes `value` is one of the choices
                 },
 
             };

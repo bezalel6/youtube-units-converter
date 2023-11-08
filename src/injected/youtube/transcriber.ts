@@ -27,7 +27,7 @@ export function filter(rawCaptions: RawCaptions) {
     let lastLine: RawCaption | null = null;
     for (const caption of rawCaptions) {
         caption.text = numberifyText(caption.text, "en");
-
+ 
         for (const match of findUnits(caption.text)) {
             // console.log(match);
             const divider = unitAllowedDividersMapping.get(match.unitType);

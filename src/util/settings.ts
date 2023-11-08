@@ -83,6 +83,7 @@ class SettingsManager {
     }
 
     public async saveSettings(): Promise<void> {
+        console.log("saving settings", this.settings)
         return new Promise<void>((resolve, reject) => {
             chrome.storage.sync.set({settings: this.settings}, () => {
                 if (chrome.runtime.lastError) {
@@ -95,15 +96,15 @@ class SettingsManager {
         });
     }
 
-    public async loadSettings(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public async loadSettings(): Promise<Settings> {
+        return new Promise<Settings>((resolve, reject) => {
             chrome.storage.sync.get(['settings'], (result) => {
                 if (chrome.runtime.lastError) {
                     reject(new Error(chrome.runtime.lastError.message));
                 } else {
                     this.settings = result.settings || defaultSettings;
                     console.log("Settings have been loaded.");
-                    resolve();
+                    resolve(this.settings);
                 }
             });
         });
