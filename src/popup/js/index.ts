@@ -17,7 +17,7 @@
 import "../scss/styles.scss";
 
 import {createSimpleRequest, simpleRequestSystem,} from "../../messaging/request_systems/simple_request";
-import {Setting, Settings, settingsManager} from "../../util/settings"; // Adjust the import path as necessary
+import {defaultSettings, Setting, Settings, settingsManager} from "../../util/settings"; // Adjust the import path as necessary
 
 // chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
 //     const activeTab = tabs[0];
@@ -213,11 +213,12 @@ class Popup {
         //     child.remove();
         // })
         const settings = settingsManager.getAllSettings();
-        Object.keys(settings).forEach((key) => {
+        Object.keys(defaultSettings).forEach((key) => {
             // Assert 'key' is actually a keyof Settings
             const optionKey = key as keyof Settings;
             // const option = this.options[optionKey];
             const option = settings[optionKey];
+            
             const inputElement = createInputForSetting(optionKey, option);
             // form.appendChild(inputElement);
             // console.log('before setting value for input', {optionKey, option, inputElement})
@@ -241,7 +242,9 @@ class Popup {
         })
         form.querySelectorAll(".changing").forEach(c => {
             c.addEventListener("change", (e) => {
+                console.log("got change")
                 const val = getValueFromInput(e.target as HTMLElement)
+                console.log("got new value from input", val)
                 settingsManager.updateSetting((e.target as HTMLElement).id as any, val);
             })
         })
@@ -290,7 +293,7 @@ function getValueFromInput(inputElement: HTMLElement): any {
     // This function needs to be implemented based on the specific requirements
     // ...
     const setting = settingsManager.getSetting(inputElement.id as keyof Settings);
-    console.log('got setting')
+    // console.log('got setting')
     return handler(setting).getValue(inputElement.id);
 }
 
@@ -336,6 +339,7 @@ function handler(setting: Setting): Handler {
                     };
                 },
                 setValue(id, value) {
+                    console.log("setting value on checkbox", id, "value is", value)
                     get<HTMLInputElement>(`#${id}`).checked = value as boolean;
                 },
             };

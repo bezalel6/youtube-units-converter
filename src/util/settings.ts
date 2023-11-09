@@ -34,7 +34,7 @@ export interface Settings {
 }
 
 // Default values for settings
-const defaultSettings: Settings = {
+export const defaultSettings: Settings = {
     textSize: {
         type: 'dropdown',
         value: '2rem',
