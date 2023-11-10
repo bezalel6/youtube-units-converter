@@ -15,16 +15,6 @@ export function setText(str: string) {
     }
 }
 
-export function moveSaveBtnClick() {
-    // const {x, y} = settingsManager.getSetting("adjustingPosition").value
-    // settingsManager.updateSetting("adjustingPosition", {isMoving: false, x, y})
-    recalcCSS();
-    // SettingsManager.adjustingPosition.value.isMoving = false;
-
-    // saveSettings(SettingsManager).then(recalcCSS);
-
-}
-
 export function isOverlayAdded() {
     return !!document.querySelector(`#${CONSTS.overlay}`);
 }
@@ -57,6 +47,7 @@ export function createOverlay() {
         recalcCSS();
         addDragListener(overlay, videoElement, {
             onDrag: (x, y) => {
+
             }
         })
         return true;

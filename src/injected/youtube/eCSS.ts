@@ -31,7 +31,7 @@ export function setCSS({settings, isMovingOverlay}: cssProps): CSS {
   border-radius: 4px; /* Rounded corners */
   display: inline;
   line-height: 1.6; /* Adjust line height to prevent overlap */
-  text-wrap:smart;
+  text-wrap:pretty;
 }
 `;
     const overlay = new CSSBuilder(`#${CONSTS.overlay}`)
@@ -40,7 +40,7 @@ export function setCSS({settings, isMovingOverlay}: cssProps): CSS {
         .s("left", "0")
         .s("direction", "ltr")
         .s("webkitTextStroke", "3px black")
-        .s("display", settings.enabled.value ? "flex" : "none")
+        .s("display", settings.enabled.value ? "inline" : "none")
         .s("alignItems", "center")
         .s(
             "color",
