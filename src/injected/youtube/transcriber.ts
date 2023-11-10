@@ -29,7 +29,7 @@ export function filter(rawCaptions: RawCaptions) {
         caption.text = numberifyText(caption.text, "en");
 
         for (const match of findUnits(caption.text)) {
-            // console.log(match);
+            console.log(match);
             let isLastLinePossible = match.position === 0 && lastLine
             let fullText = caption.text;
             if (isLastLinePossible) {
@@ -60,33 +60,33 @@ export function filter(rawCaptions: RawCaptions) {
              *  kjkjkjk 50->new line->kilometers
              *
              */
-                // if (
-                //     match.position === 0 &&
-                //     lastLine &&
-                //     endsWithNum(lastLine.text, divider) !== null
-                // ) {
-                //     captions.captions.push({
-                //         convertable: {
-                //             unit: match.unitType,
-                //             amount: endsWithNum(lastLine.text, divider)!,
-                //         },
-                //         start: lastLine.start,
-                //         duration: lastLine.duration + caption.duration,
-                //         text: caption.text,
-                //         unitMatch: match,
-                //     });
-                //     continue;
-                // }
-                //   console.log("slicing", caption);
-            const sliceBeforeUnit = caption.text.slice(0, match.position);
-            //   console.log("sliced:", sliceBeforeUnit);
+            // if (
+            //     match.position === 0 &&
+            //     lastLine &&
+            //     endsWithNum(lastLine.text, divider) !== null
+            // ) {
+            //     captions.captions.push({
+            //         convertable: {
+            //             unit: match.unitType,
+            //             amount: endsWithNum(lastLine.text, divider)!,
+            //         },
+            //         start: lastLine.start,
+            //         duration: lastLine.duration + caption.duration,
+            //         text: caption.text,
+            //         unitMatch: match,
+            //     });
+            //     continue;
+            // }
+            console.log("slicing", caption);
+            const sliceBeforeUnit = caption.text.slice(0, match.position - 1);
+            console.log("sliced:", sliceBeforeUnit);
             const num = endsWithNum(sliceBeforeUnit);
             if (num !== null) {
                 captions.captions.push({
                     convertable: {unit: match.unitType, amount: num.foundNum},
                     duration: caption.duration,
                     start: caption.start,
-                    text: caption.text.slice(num.foundNum, match.position + match.unit.length),
+                    text: caption.text.slice(num.numIndex, match.position + match.unit.length),
                     unitMatch: match,
                 });
             }

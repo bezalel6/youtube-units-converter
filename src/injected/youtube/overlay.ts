@@ -56,7 +56,7 @@ export function createOverlay() {
         // settingsManager.loadSettings();
         recalcCSS();
         addDragListener(overlay, videoElement, {
-            onDrag: () => {
+            onDrag: (x, y) => {
             }
         })
         return true;
@@ -105,7 +105,7 @@ interface ScheduledCallback {
 export async function makeConvertable(convertable: Convertable, unit: "metric" | "imperial") {
     return import('convert').then(({convert}) => {
         // console.log({convertable, unit})
-        return convertable.amount + " " + convertable.unit + " = " + convert(convertable.amount, convertable.unit as any).to("best", unit).toString(0)
+        return convert(convertable.amount, convertable.unit as any).to("best", unit).toString(0)
     })
 }
 
@@ -123,7 +123,7 @@ function onTimeUpdate() {
                 },
                 time: videoElement.currentTime,
                 duration: 20,
-                text: "yeah so heres some text"
+                text: "69cm"
             });
         }
         let str = "";
@@ -134,7 +134,7 @@ function onTimeUpdate() {
                 const unit = settingsManager.getSetting("unitSelection").value;
 
                 // if(scheduled.convertable.unit)
-                const txt = await makeConvertable(scheduled.convertable, unit as any);
+                const txt = scheduled.text + " = " + await makeConvertable(scheduled.convertable, unit as any);
                 // const txt = "fuck its the settings manager"
                 // console.log("running ", txt);
                 if (str.length) str += "\n";

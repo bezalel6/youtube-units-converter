@@ -32,6 +32,7 @@ function get<T extends HTMLElement>(selector: string): T {
 }
 
 let settingsPanel = QuickSettings.create();
+settingsPanel.setDraggable(false);
 // let settingsPanel = QuickSettings.create(undefined, undefined, undefined, document.body);
 // settingsPanel.setWidth(200)
 document.addEventListener("DOMContentLoaded", async () => {
