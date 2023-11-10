@@ -3,21 +3,21 @@ import {CONSTS, setCSS} from "./eCSS";
 import {addDragListener} from "../../util/MouseDragListener";
 import {settingsManager} from "../../util/settings";
 
-let overlayTextStr: string | null = null;
+let overlayTextStr = "";
 
 export function setText(str: string) {
-    console.log("text set to", str);
+    // console.log("text set to", str);
     const e = document.querySelector(`#${CONSTS.overlayText}`) as HTMLDivElement;
 
-    // if (overlayTextStr !== str) {
-    e.innerText = str;
-    // overlayTextStr = str;
-    // }
+    if (overlayTextStr !== str) {
+        e.innerText = str;
+        overlayTextStr = str;
+    }
 }
 
 export function moveSaveBtnClick() {
-    const {x, y} = settingsManager.getSetting("adjustingPosition").value
-    settingsManager.updateSetting("adjustingPosition", {isMoving: false, x, y})
+    // const {x, y} = settingsManager.getSetting("adjustingPosition").value
+    // settingsManager.updateSetting("adjustingPosition", {isMoving: false, x, y})
     recalcCSS();
     // SettingsManager.adjustingPosition.value.isMoving = false;
 
@@ -29,30 +29,34 @@ export function isOverlayAdded() {
     return !!document.querySelector(`#${CONSTS.overlay}`);
 }
 
+let didCreate = false;
+
 // Function to create the overlay
 export function createOverlay() {
     // Get the video element
-
+    if (didCreate) {
+        // throw "fucking shit is creating it again"
+        console.log("creating AGAIN")
+    }
+    console.log("creating overlay")
+    console.trace()
     const videoElement = document.querySelector(".html5-video-player") as HTMLElement;
     // if (isOverlayAdded()) {
     //     console.error('trying to create overlay when one exists');
     if (videoElement) {
+        didCreate = true;
         document.querySelector(`#${CONSTS.overlay}`)?.remove();
         // Create overlay element
         const overlay = document.createElement("div");
         overlay.id = `${CONSTS.overlay}`;
 
-        overlay.innerHTML = `<h1 id="${CONSTS.overlayText}"></h1><button id="${CONSTS.movementSaveBtn}">Save</button>`;
+        overlay.innerHTML = `<h1 id="${CONSTS.overlayText}" class="text-background"></h1>`;
         // Append overlay to video element
         videoElement.appendChild(overlay);
-        const btn = document.querySelector(`#${CONSTS.movementSaveBtn}`) as HTMLButtonElement
-        btn.onclick = moveSaveBtnClick;
+        // settingsManager.loadSettings();
         recalcCSS();
-        settingsManager.loadSettings();
         addDragListener(overlay, videoElement, {
             onDrag: () => {
-            }, isDragEnabled: () => {
-                return settingsManager.getSetting("adjustingPosition").value.isMoving
             }
         })
         return true;
@@ -60,9 +64,15 @@ export function createOverlay() {
     return false;
 }
 
+let isMovingOverlay = false;
+
+export function startMovingOverlay() {
+    isMovingOverlay = true;
+}
+
 export function recalcCSS() {
 
-    setCSS({settings: settingsManager.getAllSettings()});
+    setCSS({isMovingOverlay, settings: settingsManager.getAllSettings()});
 }
 
 const scheduledCallbacks: Array<ScheduledCallback> = [];
@@ -94,7 +104,7 @@ interface ScheduledCallback {
 
 export async function makeConvertable(convertable: Convertable, unit: "metric" | "imperial") {
     return import('convert').then(({convert}) => {
-        console.log({convertable, unit})
+        // console.log({convertable, unit})
         return convertable.amount + " " + convertable.unit + " = " + convert(convertable.amount, convertable.unit as any).to("best", unit).toString(0)
     })
 }
@@ -121,12 +131,12 @@ function onTimeUpdate() {
             const diff = videoElement.currentTime - scheduled.time;
             if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
                 // const txt = convertUnit(scheduled.convertable, await getSettings());
-                const unit = (settingsManager.getSetting("unitSelection").value as any).unit;
+                const unit = settingsManager.getSetting("unitSelection").value;
 
                 // if(scheduled.convertable.unit)
                 const txt = await makeConvertable(scheduled.convertable, unit as any);
                 // const txt = "fuck its the settings manager"
-                console.log("running ", txt);
+                // console.log("running ", txt);
                 if (str.length) str += "\n";
 
                 str += txt;
@@ -169,16 +179,17 @@ function setupTimeUpdateCallback() {
 // });
 
 // Create a MutationObserver to wait for the video player to load
-const observer = new MutationObserver((mutationsList, observer) => {
-    for (let mutation of mutationsList) {
-        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-            if (createOverlay()) {
-                // Disconnect the observer to prevent further mutations
-                observer.disconnect();
-            }
-        }
-    }
-});
-
-// Start observing the document with configured parameters
-observer.observe(document, {childList: true, subtree: true});
+// const observer = new MutationObserver((mutationsList, observerWE) => {
+//     for (let mutation of mutationsList) {
+//         if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+//             if (document.querySelector(".html5-video-player") && createOverlay()) {
+//                 // Disconnect the observer to prevent further mutations
+//                 observer.disconnect();
+//                 break;
+//             }
+//         }
+//     }
+// });
+//
+// // Start observing the document with configured parameters
+// observer.observe(document, {childList: true, subtree: true});

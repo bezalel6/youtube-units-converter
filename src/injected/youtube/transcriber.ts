@@ -1,5 +1,5 @@
 import {endsWithNum} from "../../util/utils";
-import {Captions, RawCaption, RawCaptions, unitAllowedDividersMapping, unitMapping, UnitMatch,} from "./captions";
+import {Captions, RawCaption, RawCaptions, unitMapping, UnitMatch,} from "./captions";
 import {numberifyText} from "numberify-text";
 // import { err } from "./logger";
 const SERVER_URL = "http://localhost:3000/transcript/";
@@ -27,14 +27,13 @@ export function filter(rawCaptions: RawCaptions) {
     let lastLine: RawCaption | null = null;
     for (const caption of rawCaptions) {
         caption.text = numberifyText(caption.text, "en");
- 
+
         for (const match of findUnits(caption.text)) {
             // console.log(match);
-            const divider = unitAllowedDividersMapping.get(match.unitType);
             let isLastLinePossible = match.position === 0 && lastLine
             let fullText = caption.text;
             if (isLastLinePossible) {
-                const lastLineEndNumMatch = endsWithNum(lastLine!.text, divider)
+                const lastLineEndNumMatch = endsWithNum(lastLine!.text)
 
                 if (lastLineEndNumMatch) {
                     fullText = ((lastLine!.text).slice(lastLineEndNumMatch.numIndex) + " " + (caption.text).slice(0, match.unit.length))
@@ -81,7 +80,7 @@ export function filter(rawCaptions: RawCaptions) {
                 //   console.log("slicing", caption);
             const sliceBeforeUnit = caption.text.slice(0, match.position);
             //   console.log("sliced:", sliceBeforeUnit);
-            const num = endsWithNum(sliceBeforeUnit, divider);
+            const num = endsWithNum(sliceBeforeUnit);
             if (num !== null) {
                 captions.captions.push({
                     convertable: {unit: match.unitType, amount: num.foundNum},

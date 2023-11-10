@@ -56,7 +56,7 @@
 
 export interface DragEventListener {
     onDrag: (x: number, y: number) => void;
-    isDragEnabled: () => boolean;
+    // isDragEnabled: () => boolean;
 }
 
 type E = HTMLElement;
@@ -101,14 +101,14 @@ export function addDragListener(overlay: E, video: E, listener: DragEventListene
 
     // Adjust overlay position when entering or exiting fullscreen
     function adjustOverlay() {
-        if (listener.isDragEnabled()) {
-            // const scaleWidth = video.clientWidth / screen.width;
-            // const scaleHeight = video.clientHeight / screen.height;
-            // const newX = absPos.x * scaleWidth;
-            // const newY = absPos.y * scaleHeight;
-            overlay.style.left = `${absPos.x}px`;
-            overlay.style.top = `${absPos.y}px`;
-        }
+        // if (listener.isDragEnabled()) {
+        // const scaleWidth = video.clientWidth / screen.width;
+        // const scaleHeight = video.clientHeight / screen.height;
+        // const newX = absPos.x * scaleWidth;
+        // const newY = absPos.y * scaleHeight;
+        overlay.style.left = `${absPos.x}px`;
+        overlay.style.top = `${absPos.y}px`;
+        // }
     }
 
     // Event listener for fullscreen change

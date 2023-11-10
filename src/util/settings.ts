@@ -1,4 +1,7 @@
 // Types for individual settings
+
+import {recalcCSS} from "../injected/youtube/overlay";
+
 export interface CheckboxSetting {
     type: 'checkbox';
     value: boolean;
@@ -13,15 +16,8 @@ export interface DropdownSetting {
 
 }
 
-export interface PositionAdjustSetting {
-    type: 'positionAdjust';
-    value: { isMoving: boolean; x: number; y: number };
-    name: string;
-
-}
-
 // Union type for the setting types
-export type Setting = CheckboxSetting | DropdownSetting | PositionAdjustSetting;
+export type Setting = CheckboxSetting | DropdownSetting;
 
 // Define the structure for all possible settings
 export interface Settings {
@@ -30,7 +26,6 @@ export interface Settings {
     textColor: DropdownSetting;
     enabled: CheckboxSetting;
     testing: CheckboxSetting;
-    adjustingPosition: PositionAdjustSetting;
 }
 
 // Default values for settings
@@ -63,11 +58,6 @@ export const defaultSettings: Settings = {
         value: false,
         name: "Testing"
     },
-    adjustingPosition: {
-        type: 'positionAdjust',
-        value: {isMoving: false, x: 0, y: 0},
-        name: "Move"
-    },
 };
 
 // SettingsManager class
@@ -75,34 +65,49 @@ class SettingsManager {
     private settings: Settings;
 
     constructor() {
-        this.settings = defaultSettings;
+        // this.settings = defaultSettings;
+
+        // this.loadSettings()
     }
 
     public getAllSettings(): Settings {
         return this.settings;
     }
 
+    public setSettings(settings: Settings) {
+        this.settings
+            = settings;
+        this.saveSettings()
+    }
+
     public async saveSettings(): Promise<void> {
+        // debounce(
+        //     () => {
         console.log("saving settings", this.settings)
+
         return new Promise<void>((resolve, reject) => {
-            chrome.storage.sync.set({settings: this.settings}, () => {
+            chrome.storage.sync.set({"new-settings": this.settings}, () => {
                 if (chrome.runtime.lastError) {
                     reject(new Error(chrome.runtime.lastError.message));
                 } else {
-                    console.log("Settings have been saved.");
+                    console.log("Settings have been saved.", this.settings);
                     resolve();
                 }
             });
         });
+        // }
+        // )()
+
     }
+
 
     public async loadSettings(): Promise<Settings> {
         return new Promise<Settings>((resolve, reject) => {
-            chrome.storage.sync.get(['settings'], (result) => {
+            chrome.storage.sync.get(['new-settings'], (result) => {
                 if (chrome.runtime.lastError) {
                     reject(new Error(chrome.runtime.lastError.message));
                 } else {
-                    this.settings = result.settings || defaultSettings;
+                    this.settings = result['new-settings'] || defaultSettings;
                     console.log("Settings have been loaded.");
                     resolve(this.settings);
                 }
@@ -130,4 +135,8 @@ class SettingsManager {
 
 // Export a singleton instance of the SettingsManager
 const settingsManager = new SettingsManager();
+settingsManager.loadSettings().then(loaded => {
+    console.log("initialized settings manager", loaded);
+    recalcCSS();
+})
 export {settingsManager};

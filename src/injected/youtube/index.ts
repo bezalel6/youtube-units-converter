@@ -17,24 +17,25 @@
 
 import {handleRequestInTab} from "../../messaging/framework/handle_request";
 import {transcribe} from "./transcriber";
-import {captionsSetup, createOverlay,} from "./overlay";
+import {captionsSetup, createOverlay, recalcCSS, startMovingOverlay,} from "./overlay";
 import {log} from "./logger";
 import "./styles.css"
 import convert from 'convert'
-import {settingsManager} from "../../util/settings";
-// gotta import it so webpack keeps it so it can be dynamically imported later
+import {Settings, settingsManager} from "../../util/settings";
+// gotta import it so webpack keeps it so it can be dynamically imported later!!
 console.log("convert says:", convert(69, "kg").to("best", "metric").toString(0))
 /**
  * handle requests sent via the message system
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("received request in tab", request);
-    if (request.data.message == "popup-popped") {
-        // run();
-    } else if (request.data.message === "settings-change") {
-        settingsManager.loadSettings();
-
+    // console.log("received request in tab", request);
+    if (request.type === "settings-update") {
+        settingsManager.setSettings(request.data as Settings);
+        // settingsManager.saveSettings()
+    } else if (request.type === "move-btn") {
+        startMovingOverlay();
     }
+    recalcCSS();
     return handleRequestInTab(request, sender, sendResponse);
 });
 
@@ -52,8 +53,9 @@ function run() {
         transcribe(videoId)
             .then((captions) => {
                 console.log(captions);
-                createOverlay();
-                captionsSetup(captions);
+                createOverlay()
+
+                return captionsSetup(captions);
             })
             .catch(e => {
                 // if(e instanceof  NotConnectedToServerErr){
@@ -64,7 +66,7 @@ function run() {
         // }
     } else {
         if (!videoId)
-            console.error("couldnt get video id");
+            console.log("couldnt get video id");
         else if (videoId === currentVideoID) {
             console.log("already running on this id")
         }
@@ -129,16 +131,12 @@ function getVideoId() {
         const urlObj = new URL(url);
         const params = new URLSearchParams(urlObj.search);
         const res = params.has("v") ? params.get("v") : null;
-        console.log("returning", res);
+        // console.log("returning", res);
         return res;
     }
 }
 
 (async () => {
-    console.log(`loaded in ${document.title}`);
-    chrome.storage.sync.get(["settings"], (result) => {
-        console.log(result);
-    });
     run();
 
     // const {convert} = await import("convert")

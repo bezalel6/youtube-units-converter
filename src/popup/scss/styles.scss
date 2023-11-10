@@ -1,28 +1,25 @@
 body {
-  height: 250px;
-  width: 350px;
-  // background-image: url('../media/background.png');
-  background-size: 100% 100%;
-  background-color: black;
-  color: white;
+  height: max-content;
+  width: max-content;
 }
 
-body {
-  background-color: #f8f9fa; /* Light grey background */
-  color: #495057; /* Dark grey text */
-}
-
-.custom-card {
-  background-color: white;
-  border-radius: 0.25rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.custom-header {
-  background-color: #007bff; /* Bootstrap primary color */
-  color: white;
-}
-
-.custom-select {
-  border-radius: 0.25rem;
-}
+//
+//body {
+//  background-color: #f8f9fa; /* Light grey background */
+//  color: #495057; /* Dark grey text */
+//}
+//
+//.custom-card {
+//  background-color: white;
+//  border-radius: 0.25rem;
+//  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+//}
+//
+//.custom-header {
+//  background-color: #007bff; /* Bootstrap primary color */
+//  color: white;
+//}
+//
+//.custom-select {
+//  border-radius: 0.25rem;
+//}

@@ -11,12 +11,6 @@ export interface UnitMatch {
     position: number;
 }
 
-export const unitAllowedDividersMapping: Map<UnitType, string[]> = new Map([
-    // ["Kilometer", []],
-    // ["Mile", []],
-    // ["Fahrenheit", ["degrees", "degree"]],
-    // ["Celsius", ["degrees", "degree"]],
-]);
 export const unitMapping: Record<string, UnitType> = {
     // Length units
     km: "kilometer",

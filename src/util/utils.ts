@@ -37,6 +37,26 @@ export const endsWithNum = (
     return null;
 };
 
+export function debounce(func: Function, wait: number = 500) {
+    let timeout: number | undefined;
+
+    return function executedFunction(...args: any[]) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+
+        clearTimeout(timeout);
+        timeout = window.setTimeout(later, wait);
+    };
+};
+
+// Usage
+// const callback = () => {
+//     console.log('Callback is called!');
+// };
+//
+// const debouncedCallback = debounce(callback, 500);
 export function shallowEqual(obj1: any, obj2: any): boolean {
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
