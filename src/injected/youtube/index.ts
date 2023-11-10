@@ -59,7 +59,7 @@ function run() {
             })
             .catch(e => {
                 // if(e instanceof  NotConnectedToServerErr){
-                log("not connected to server", "error")
+                log("error!\n" + JSON.stringify(e), "error")
                 // }
 
             });
