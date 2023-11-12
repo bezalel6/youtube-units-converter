@@ -1,24 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "create-extension template",
+  "name": "EZUnits",
   "version": "1.0.0",
-
-  "description": "The next great extension to take the Web Store by storm - Built with create-extension.",
-
+  "description": "EZUnits: Instantly convert units in YouTube videos! Choose your preferred system (Metric/Imperial) and enjoy seamless conversions.",
   "action": {
-    "default_title": "create-extension template",
+    "default_title": "EZUnits settings",
     "default_popup": "popup/index.html",
     "default_icon": {
-      "16": "icon/icon16.png",
-      "24": "icon/icon24.png",
-      "32": "icon/icon32.png"
+      "16": "icon/icon.png",
+      "32": "icon/icon.png"
     }
   },
   "options_page": "options/index.html",
   "icons": {
-    "16": "icon/icon16.png",
-    "48": "icon/icon48.png",
-    "128": "icon/icon128.png"
+    "16": "icon/icon.png",
+    "48": "icon/icon.png",
+    "128": "icon/icon.png"
   },
   "background": {
     "service_worker": "background/service_worker.js"
@@ -31,10 +28,20 @@
         "http://*/youtube/*",
         "https://www.youtube.com/*"
       ],
-      "js": ["injected/youtube.js"]
+      "js": [
+        "injected/youtube.js"
+      ]
     }
   ],
-  "host_permissions": ["*://*/"],
-  "homepage_url": "https://github.com/albertpatterson/chrome-extension-starter",
-  "permissions": ["webNavigation", "scripting", "tabs", "activeTab", "storage"]
+  "host_permissions": [
+    "*://*/"
+  ],
+  "homepage_url": "https://github.com/bezalel6/youtube-units-converter",
+  "permissions": [
+    "webNavigation",
+    "scripting",
+    "tabs",
+    "activeTab",
+    "storage"
+  ]
 }

@@ -1,7 +1,7 @@
 {
-  "name": "made_with_create-extension",
+  "name": "EZUnits-extension",
   "version": "1.0.0",
-  "description": "A browser extension made with create-extension",
+  "description": "EZUnits: Instantly convert units in YouTube videos! Choose your preferred system (Metric/Imperial) and enjoy seamless conversions.",
   "main": "index.js",
   "scripts": {
     "build": "node build/prod -r",
@@ -10,11 +10,11 @@
     "test": "jest",
     "test-watch": "jest --watch"
   },
-  "author": "Albert Patterson",
+  "author": "RNDev",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/albertpatterson/create-extension"
+    "url": "https://github.com/bezalel6/youtube-units-converter"
   },
   "license": "GPL-3.0",
   "dependencies": {
