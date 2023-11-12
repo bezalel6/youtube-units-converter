@@ -50,6 +50,7 @@ export function addDragListener(overlay: E, video: E, listener: DragEventListene
         yRatio: number;
     };
 
+    
     let currentRatio: PositionRatios = {xRatio: 0, yRatio: 0};
 
     function updateCurrentPosRatio() {

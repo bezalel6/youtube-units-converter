@@ -95,8 +95,9 @@ interface ScheduledCallback {
 
 export async function makeConvertable(convertable: Convertable, unit: "metric" | "imperial") {
     return import('convert').then(({convert}) => {
+
         // console.log({convertable, unit})
-        return convert(convertable.amount, convertable.unit as any).to("best", unit).toString(0)
+        return convert(convertable.amount, convertable.unit as any).to("best", unit)
     })
 }
 
@@ -121,11 +122,20 @@ function onTimeUpdate() {
         for (const scheduled of callbacks) {
             const diff = videoElement.currentTime - scheduled.time;
             if (diff >= 0 && diff < Math.max(TTL, scheduled.duration)) {
+
                 // const txt = convertUnit(scheduled.convertable, await getSettings());
                 const unit = settingsManager.getSetting("unitSelection").value;
+                const converted = await makeConvertable(scheduled.convertable, unit as any);
 
+                // check if the current selected unit is the same as the one used in the video, which means it doesnt need to be shown.
+                // if (Object.keys(unitMapping).find(k => {
+                //     console.log(k, unit, unitMapping[k], converted.unit)
+                //     return k === unit && unitMapping[k] === scheduled.convertable.unit
+                // })) {
+                //     continue
+                // }
                 // if(scheduled.convertable.unit)
-                const txt = scheduled.text + " = " + await makeConvertable(scheduled.convertable, unit as any);
+                const txt = scheduled.text + " = " + converted.toString(0);
                 // const txt = "fuck its the settings manager"
                 // console.log("running ", txt);
                 if (str.length) str += "\n";
