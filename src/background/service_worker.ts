@@ -16,27 +16,21 @@
 
 import {handleRequestInServiceWorker} from "../messaging/framework/handle_request";
 
-/**
- * handle requests sent via the message system
- */
-// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-//     console.log("received message in service worker", request);
-//
-//     return handleRequestInServiceWorker(request, sender, sendResponse);
-// });
-
-// In background.js
+/// In background.js
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.action === "broadcast") {
-        // Send the message to all tabs
-        chrome.tabs.query({active: true}, function (tabs) {
+        // Send the message to all tabs, not just active ones
+        chrome.tabs.query({}, function (tabs) {
             tabs.forEach(function (tab) {
-                chrome.tabs.sendMessage(tab.id as number, {...message});
+                // Check if the tab has an ID before sending a message
+                if (tab.id !== undefined) {
+                    chrome.tabs.sendMessage(tab.id, {...message});
+                }
             });
         });
-        // sendResponse(true)
-        // return true;
+        // Optional: send a response back to the sender
+        // sendResponse({status: "broadcast initiated"});
+        // return true; // Keep the message channel open if you are using sendResponse asynchronously
     }
     return handleRequestInServiceWorker(message, sender, sendResponse);
-
 });
