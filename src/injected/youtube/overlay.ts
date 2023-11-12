@@ -1,4 +1,4 @@
-import {Captions, Convertable} from "./captions";
+import {Captions, Convertable, unitMapping} from "./captions";
 import {CONSTS, setCSS} from "./eCSS";
 import {addDragListener} from "../../util/MouseDragListener";
 import {settingsManager} from "../../util/settings";
@@ -97,7 +97,7 @@ export async function makeConvertable(convertable: Convertable, unit: "metric" |
     return import('convert').then(({convert}) => {
 
         // console.log({convertable, unit})
-        return convert(convertable.amount, convertable.unit as any).to("best", unit)
+        return convert(convertable.amount, convertable.unit.t as any).to("best", unit)
     })
 }
 
@@ -110,7 +110,7 @@ function onTimeUpdate() {
         if (settingsManager.getSetting("testing").value) {
             callbacks.push({
                 convertable: {
-                    unit: "cm",
+                    unit: unitMapping["cm"],
                     amount: 69
                 },
                 time: videoElement.currentTime,
@@ -128,12 +128,11 @@ function onTimeUpdate() {
                 const converted = await makeConvertable(scheduled.convertable, unit as any);
 
                 // check if the current selected unit is the same as the one used in the video, which means it doesnt need to be shown.
-                // if (Object.keys(unitMapping).find(k => {
-                //     console.log(k, unit, unitMapping[k], converted.unit)
-                //     return k === unit && unitMapping[k] === scheduled.convertable.unit
-                // })) {
-                //     continue
-                // }
+                if (Object.keys(unitMapping).find(k => {
+                    return k === scheduled.convertable.unit.t && unit === scheduled.convertable.unit.system
+                })) {
+                    continue
+                }
                 // if(scheduled.convertable.unit)
                 const txt = scheduled.text + " = " + converted.toString(0);
                 // const txt = "fuck its the settings manager"
