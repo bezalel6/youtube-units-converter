@@ -29,14 +29,18 @@ console.log("convert says:", convert(69, "kg").to("best", "metric").toString(0))
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // console.log("received request in tab", request);
+    let handled = false;
     if (request.type === "settings-update") {
-        settingsManager.setSettings(request.data as Settings);
+        settingsManager.setSettings(request.data as Settings).then(recalcCSS).then(() => sendResponse(true));
+        handled = true;
         // settingsManager.saveSettings()
     } else if (request.type === "move-btn") {
         startMovingOverlay();
+        recalcCSS();
     }
-    recalcCSS();
-    return handleRequestInTab(request, sender, sendResponse);
+    if (!handled)
+        return handleRequestInTab(request, sender, sendResponse);
+    return true;
 });
 
 let currentVideoID: string | null;

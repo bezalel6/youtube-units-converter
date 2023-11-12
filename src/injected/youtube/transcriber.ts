@@ -1,105 +1,101 @@
 import {endsWithNum} from "../../util/utils";
-import {Captions, RawCaption, RawCaptions, unitMapping, UnitMatch,} from "./captions";
+import {Captions, RawCaption, RawCaptions, unitMapping, UnitMatch} from "./captions";
 import {numberifyText} from "numberify-text";
-// import { err } from "./logger";
-const SERVER_URL = "https://function-1-uezwomtlfa-uc.a.run.app/?video_id=";
 
-// const SERVER_URL = "http://localhost:3000/transcript/";
+const SERVER_URL = "https://function-1-uezwomtlfa-uc.a.run.app/?video_id=";
 
 export async function transcribe(videoId: string): Promise<Captions> {
     return fetch(SERVER_URL + videoId)
         .then((res) => res.json())
-        .then((cap) => {
-            return filter(cap as RawCaptions);
-        })
+        .then((cap) => filter(cap as RawCaptions));
 }
 
-export function filter(rawCaptions: RawCaptions) {
-    const captions: Captions = {
-        captions: [],
-    };
+export function filter(rawCaptions: RawCaptions): Captions {
+    const captions: Captions = {captions: []};
     let lastLine: RawCaption | null = null;
+
     for (const caption of rawCaptions) {
         caption.text = numberifyText(caption.text, "en");
 
         for (const match of findUnits(caption.text)) {
-            let isLastLinePossible = match.position === 0 && lastLine
-            let fullText = caption.text;
-            if (isLastLinePossible) {
-                const lastLineEndNumMatch = endsWithNum(lastLine!.text)
-
+            // console.log("match", match)
+            if (shouldCombineWithPreviousLine(match, lastLine)) {
+                const lastLineEndNumMatch = endsWithNum(lastLine!.text);
                 if (lastLineEndNumMatch) {
-                    fullText = ((lastLine!.text).slice(lastLineEndNumMatch.numIndex) + " " + (caption.text).slice(0, match.unit.length))
-                    // alert("actually found new line divider. full built text: " + fullText)
-                    captions.captions.push({
-                        convertable: {
-                            unit: match.unitType,
-                            amount: lastLineEndNumMatch.foundNum,
-                        },
-                        start: lastLine!.start,
-                        duration: lastLine!.duration + caption.duration,
-                        text: fullText,
-                        unitMatch: match,
-                    });
+                    const combinedText = buildCombinedText(lastLine!, caption, match, lastLineEndNumMatch);
+                    pushCombinedCaption(captions, lastLine!, caption, match, lastLineEndNumMatch.foundNum, combinedText);
                     continue;
                 }
             }
-            //this is actually ok, because the last line text already got replaced
-            caption.text = caption.text.replace(/,/g, "");
 
-            // let txt = caption.text.slice(caption.start,)
-            /** covering edge case of:
-             *
-             *  kjkjkjk 50->new line->kilometers
-             *
-             */
-                // if (
-                //     match.position === 0 &&
-                //     lastLine &&
-                //     endsWithNum(lastLine.text, divider) !== null
-                // ) {
-                //     captions.captions.push({
-                //         convertable: {
-                //             unit: match.unitType,
-                //             amount: endsWithNum(lastLine.text, divider)!,
-                //         },
-                //         start: lastLine.start,
-                //         duration: lastLine.duration + caption.duration,
-                //         text: caption.text,
-                //         unitMatch: match,
-                //     });
-                //     continue;
-                // }
-            const sliceBeforeUnit = caption.text.slice(0, match.position - 1);
-            const num = endsWithNum(sliceBeforeUnit);
-            if (num !== null) {
-                captions.captions.push({
-                    convertable: {unit: match.unitType, amount: num.foundNum},
-                    duration: caption.duration,
-                    start: caption.start,
-                    text: caption.text.slice(num.numIndex, match.position + match.unit.length),
-                    unitMatch: match,
-                });
-            }
+            handleRegularCase(captions, caption, match);
         }
+
         lastLine = caption;
     }
+
     return captions;
+}
+
+function shouldCombineWithPreviousLine(match: UnitMatch, lastLine: RawCaption | null): boolean {
+    return match.quantity === undefined && lastLine !== null;
+}
+
+function buildCombinedText(lastLine: RawCaption, currentLine: RawCaption, match: UnitMatch, lastLineEndNumMatch: any): string {
+    return lastLine.text.slice(lastLineEndNumMatch.numIndex) + " " + currentLine.text.slice(0, match.unit.length);
+}
+
+function pushCombinedCaption(captions: Captions, lastLine: RawCaption, currentLine: RawCaption, match: UnitMatch, amount: number, text: string): void {
+    captions.captions.push({
+        convertable: {unit: match.unitType, amount: amount},
+        start: lastLine.start,
+        duration: lastLine.duration + currentLine.duration,
+        text: text,
+        unitMatch: match,
+    });
+}
+
+function handleRegularCase(captions: Captions, caption: RawCaption, match: UnitMatch): void {
+    captions.captions.push({
+        convertable: {unit: match.unitType, amount: match.quantity!},
+        duration: caption.duration,
+        start: caption.start,
+        text: match.fullText,
+        unitMatch: match,
+    })
 }
 
 export function findUnits(text: string): UnitMatch[] {
     const results: UnitMatch[] = [];
+    // Updated regex to include numbers with commas
     const regex = new RegExp(
-        `\\b(${Object.keys(unitMapping).join("|")})\\b`,
+        `(\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?)*\\s*(${Object.keys(unitMapping).join("|")})\\b`,
         "ig"
     );
 
     const matches = text.matchAll(regex);
     for (const match of matches) {
-        // console.log(match);
-        const unit = match[1].toLowerCase();
-        results.push({unitType: unitMapping[unit], unit, position: match.index!});
+        let currentlyAdding: UnitMatch;
+        const unit = match[2].toLowerCase();
+        if (match[1]) {
+            currentlyAdding = {
+                quantity: Number(match[1].replace(/,/g, '')),
+                unit,
+                fullText: `${match[1]}${unit}`,
+                unitType: unitMapping[unit],
+            };
+        } else {
+            currentlyAdding = {
+                quantity: undefined,
+                unit,
+                unitType: unitMapping[unit],
+                fullText: unit,
+            };
+        }
+        results.push(currentlyAdding)
     }
 
     return results;
 }
+
+

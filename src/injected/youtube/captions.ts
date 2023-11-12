@@ -9,7 +9,9 @@ export type UnitType = { t: Area | Length | Temperature; system: "imperial" | "m
 export interface UnitMatch {
     unitType: UnitType;
     unit: string;
-    position: number;
+    quantity: number | undefined;
+    fullText: string; // Full text of the quantity and unit
+
 }
 
 export const unitMapping: Record<string, UnitType> = {

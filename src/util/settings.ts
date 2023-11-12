@@ -74,10 +74,10 @@ class SettingsManager {
         return this.settings;
     }
 
-    public setSettings(settings: Settings) {
+    public async setSettings(settings: Settings) {
         this.settings
             = settings;
-        this.saveSettings()
+        return this.saveSettings()
     }
 
     public async saveSettings(): Promise<void> {
