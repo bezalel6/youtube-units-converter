@@ -48,3 +48,8 @@ EZUnits is available under the [MIT License](https://mit-license.org/).
 - Leveraging `youtube-transcript-api` for accessing YouTube video transcripts.
 
 With EZUnits, enjoy seamless unit conversions on YouTube, where privacy and user preference are paramount.
+
+Loved EZUnits? If you find it helpful, consider supporting my work. A coffee goes a long way in fueling my coding
+sessions! ☕
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/RNDev)

@@ -39,7 +39,6 @@
   "homepage_url": "https://github.com/bezalel6/youtube-units-converter",
   "permissions": [
     "webNavigation",
-    "scripting",
     "tabs",
     "activeTab",
     "storage"
