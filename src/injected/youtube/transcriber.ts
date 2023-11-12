@@ -4,10 +4,14 @@ import {numberifyText} from "numberify-text";
 
 const SERVER_URL = "https://function-1-uezwomtlfa-uc.a.run.app/?video_id=";
 
-export async function transcribe(videoId: string): Promise<Captions> {
+export async function getProcessedCaptions(videoId: string): Promise<Captions> {
+    return transcribe(videoId).then(filter)
+}
+
+export async function transcribe(videoId: string): Promise<RawCaptions> {
     return fetch(SERVER_URL + videoId)
         .then((res) => res.json())
-        .then((cap) => filter(cap as RawCaptions));
+        .then((cap) => cap as RawCaptions);
 }
 
 export function filter(rawCaptions: RawCaptions): Captions {

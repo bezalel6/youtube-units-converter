@@ -16,7 +16,7 @@
  */
 
 import {handleRequestInTab} from "../../messaging/framework/handle_request";
-import {transcribe} from "./transcriber";
+import {getProcessedCaptions} from "./transcriber";
 import {captionsSetup, createOverlay, recalcCSS, startMovingOverlay,} from "./overlay";
 import {log} from "./logger";
 import "./styles.css"
@@ -54,7 +54,7 @@ function run() {
         // if (isOverlayAdded()) {
         //     console.log("overlay exists. not recreating");
         // } else {
-        transcribe(videoId)
+        getProcessedCaptions(videoId)
             .then((captions) => {
                 console.log(captions);
                 createOverlay()

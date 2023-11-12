@@ -1,5 +1,7 @@
-import {filter, findUnits} from "../src/injected/youtube/transcriber";
+import {filter, findUnits, transcribe} from "../src/injected/youtube/transcriber";
 import {RawCaptions} from "../src/injected/youtube/captions";
+import testingCaptions from './testingVidCaptions.json'
+import "isomorphic-fetch"
 
 function mockCaptions(...strs: string[]): RawCaptions {
     return strs.map(s => ({start: 4, text: s, duration: 4}));
@@ -25,11 +27,18 @@ describe("basic recognition functionality", () => {
         }])
     })
     it("recognize when number is split between two lines", () => {
-
         testFilter(500, "hello this is 500", 'ft');
     })
     it("digits in text", () => {
         testFilter(500, "hello this is five hundred", 'ft')
     })
 });
-// describe("")
+
+const testingID = "dQw4w9WgXcQ"
+
+describe("server connection and functionality", () => {
+    it("sane checking captions", async () => {
+        const got = await transcribe(testingID);
+        expect(got).toEqual(testingCaptions);
+    })
+})
